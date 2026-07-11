@@ -17,10 +17,13 @@ export function CardCollection({ items, category }: CardCollectionProps) {
   const [view, setView] = useState<ViewMode>("grid");
 
   useEffect(() => {
+    // Reads the persisted view preference from localStorage (an external
+    // system) and syncs it into local state once, after mount.
     const stored = window.localStorage.getItem(
       `${STORAGE_KEY_PREFIX}${category}`
     );
     if (stored === "grid" || stored === "list") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setView(stored);
     }
   }, [category]);

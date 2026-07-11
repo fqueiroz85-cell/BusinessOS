@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { STATUS_OPTIONS } from "@/lib/status";
+import { STATUS_LABELS, STATUS_OPTIONS } from "@/lib/status";
 import type { ContentItem, ContentStatus } from "@/lib/content";
 
 type ItemEditorProps = {
@@ -85,6 +85,7 @@ export function ItemEditor({ item }: ItemEditorProps) {
       <div className="flex flex-col gap-2">
         <Label htmlFor="status">Status</Label>
         <Select
+          items={STATUS_LABELS}
           value={status}
           onValueChange={(next) => setStatus(next as ContentStatus)}
         >

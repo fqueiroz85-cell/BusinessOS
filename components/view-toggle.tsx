@@ -15,9 +15,15 @@ type ViewToggleProps = {
   onChange: (value: ViewMode) => void;
 };
 
+const VIEW_LABELS: Record<ViewMode, string> = {
+  grid: "Grade",
+  list: "Lista",
+};
+
 export function ViewToggle({ value, onChange }: ViewToggleProps) {
   return (
     <Select
+      items={VIEW_LABELS}
       value={value}
       onValueChange={(next) => {
         if (next === "grid" || next === "list") {
