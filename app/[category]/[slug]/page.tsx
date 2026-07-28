@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ItemEditor } from "@/components/item-editor";
+import { ProposalBanner } from "@/components/proposal-banner";
 import { getItem } from "@/lib/content";
 import { getCategoryMeta } from "@/lib/categories";
 
@@ -27,6 +28,19 @@ export default async function ItemDetailPage({ params }: PageProps) {
           {item.title}
         </h1>
       </div>
+      {item.reviewStatus === "proposed" ? (
+        <ProposalBanner
+          category={item.category}
+          slug={item.slug}
+          proposedBy={item.proposedBy ?? ""}
+          proposedAt={item.proposedAt ?? ""}
+          proposedRationale={item.proposedRationale ?? ""}
+          proposedSummary={item.proposedSummary}
+          proposedBody={item.proposedBody}
+          currentSummary={item.summary}
+          currentBody={item.body}
+        />
+      ) : null}
       <ItemEditor item={item} />
     </div>
   );

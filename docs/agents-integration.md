@@ -1,6 +1,6 @@
 # Integração com Agentes de IA e Skills — Arquitetura
 
-**Status:** proposta de arquitetura + fase 1 implementada.
+**Status:** proposta de arquitetura + fase 1 e fase 2 implementadas.
 **Relacionado:** `docs/briefing.md` (visão de produto), `docs/prd.md` (fora de escopo v1), `docs/spec.md` (seção 11 — Integração Futura: Agentes de IA e Skills).
 
 Este documento detalha, em nível de implementação, como agentes de IA externos ao BusinessOS vão ler e (no futuro) escrever no contexto de negócio armazenado em `content/`. Ele assume o modelo de dados já existente: cada item é um arquivo `.md` com frontmatter YAML, acessado via `lib/content.ts` (`getCategoryItems`, `getItem`, `saveItem`), agrupado em 4 categorias fixas (`founder`, `direcao`, `validacao`, `caixa`).
@@ -213,7 +213,7 @@ Conforme `docs/spec.md` (seção 10), a camada `lib/content.ts` é o único pont
 - Nenhuma escrita por agente. Nenhuma skill implementada. Nenhuma UI de revisão.
 - Objetivo: validar que o contrato de leitura é suficiente para um agente externo (ex. um script simples, ou outro agente de IA) consumir o contexto de negócio de forma completa e correta.
 
-### Fase 2 — Propostas de mudança via skills, com revisão humana
+### Fase 2 — Propostas de mudança via skills, com revisão humana (implementada nesta mudança)
 
 - Implementar `POST /api/agent/write` (seção 3, Opção B) com os campos `agent`/`rationale`.
 - Estender o frontmatter com `reviewStatus`/`proposedBy`/`proposedAt`/`proposedRationale` (seção 5).
@@ -235,3 +235,19 @@ Conforme `docs/spec.md` (seção 10), a camada `lib/content.ts` é o único pont
 - `GET /api/context` implementado em `app/api/context/route.ts`, reaproveitando `getCategoryItems` de `lib/content.ts` — sem duplicar lógica de leitura/parsing de `.md`.
 - Nenhuma rota de escrita por agente foi criada nesta fase; `POST /api/content` continua sendo exclusivamente o caminho de escrita da UI humana.
 - A arquitetura de skills, o contrato de entrada/saída, e o modelo de revisão humana ficam documentados aqui como proposta para a fase 2, não implementados agora.
+
+---
+
+## 9. Resumo das decisões — Fase 2
+
+- `lib/content.ts` ganhou `proposeChange`, `acceptProposal` e `rejectProposal`, seguindo o fluxo da seção 5: uma skill nunca sobrescreve `body` diretamente — `proposeChange` grava a proposta em campos separados e marca `reviewStatus: "proposed"`; `acceptProposal` promove `proposedBody`/`proposedSummary` para `body`/`summary` e limpa os campos de proposta; `rejectProposal` descarta a proposta preservando o conteúdo original.
+- Duas rotas novas em `app/api/agent/`: `POST /api/agent/write` (Opção B da seção 3 — recebe `{ category, slug, agent, rationale, body?, summary? }`, chama `proposeChange`, devolve `{ success: true, item }` ou `{ success: false, error }`) e `POST /api/agent/review` (aplica a decisão humana de aceitar/rejeitar uma proposta pendente, chamando `acceptProposal`/`rejectProposal`).
+- `ContentItem` (em `lib/content.ts`) ganhou os campos opcionais de frontmatter descritos na seção 5: `reviewStatus`, `proposedBy`, `proposedAt`, `proposedRationale`, `proposedSummary`, `proposedBody` — presentes apenas quando há uma proposta pendente.
+- A UI ganhou o componente `ProposalBanner`, exibido na página de detalhe do item quando `reviewStatus === "proposed"`, mostrando a `rationale`, o autor (`proposedBy`) e ações explícitas de aceitar/rejeitar — nenhuma skill consegue, por si só, mover um item para `reviewStatus: "accepted"` (o limite de segurança central da seção 5 continua valendo: agentes propõem, o founder dispõe).
+- Duas skills de referência foram implementadas em `scripts/skills/`, seguindo o contrato da seção 4 e rodando como processos externos ao BusinessOS (seção 1) — scripts TypeScript executados com `tsx`, que consomem `GET /api/context` e `POST /api/agent/write` via HTTP, sem importar `lib/content.ts` diretamente:
+  - `scripts/skills/shared.ts` — helpers `fetchContext` e `proposeWrite` reutilizados pelas duas skills, com os tipos mínimos de `ContentItem`/`BusinessContext` declarados localmente (o script roda fora do processo Next.js).
+  - `scripts/skills/mapa-do-mercado.ts` (`agent: "skill:mapa-do-mercado"`) — propõe um esqueleto estruturado de Mapa do Mercado ("Tamanho do mercado", "Tendências", "Concorrentes diretos", "Concorrentes indiretos", "Dinâmica competitiva"), cada seção com bullets-placeholder. Não pesquisa o mercado nem chama nenhuma API de IA — valida apenas o fluxo propor → revisar → aceitar. Executar com `npm run skill:mapa-do-mercado`.
+  - `scripts/skills/tese-de-valor.ts` (`agent: "skill:tese-de-valor"`) — propõe um esqueleto de Tese de Valor ("Hipótese central", "Por que este cliente pagaria", "Evidência hoje", "Riscos da hipótese"), lendo também `direcao/perfil-ideal-de-cliente` e `direcao/mapa-de-problemas` como `relatedContext` (seção 4) para incluir avisos no `rationale` quando esses itens ainda parecem não preenchidos (heurística simples: corpo com menos de 200 caracteres). Executar com `npm run skill:tese-de-valor`.
+  - Ambos os scripts dependem do servidor Next.js rodando em `http://localhost:3000` (configurável via `BUSINESSOS_URL`) para funcionar ponta a ponta; sem o servidor no ar, falham de forma controlada ao chamar `fetch`.
+- `tsx` foi adicionado como devDependency (`package.json`) para permitir rodar os scripts `.ts` diretamente via `npm run skill:*`, sem passo de build separado.
+- **Fase 3 (agentes autônomos, permissões granulares por agente/skill, autenticação) continua não implementada** — a invocação das skills desta fase é sempre manual (Felipe rodando `npm run skill:*`), não há orquestração autônoma, nem sistema de permissões por agente/skill (qualquer `agent` pode propor mudança em qualquer `category`/`slug` existente — `proposeChange` só valida que o item existe, não que o chamador tem permissão sobre ele), nem autenticação nas rotas.

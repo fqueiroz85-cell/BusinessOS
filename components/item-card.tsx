@@ -28,9 +28,12 @@ export function ItemCard({ item, variant = "grid" }: ItemCardProps) {
         >
           <div className="flex items-center justify-between gap-3">
             <CardTitle>{item.title}</CardTitle>
-            <Badge variant="secondary" className="shrink-0">
-              {STATUS_LABELS[item.status]}
-            </Badge>
+            <div className="flex shrink-0 items-center gap-2">
+              {item.reviewStatus === "proposed" ? (
+                <Badge variant="outline">Proposta pendente</Badge>
+              ) : null}
+              <Badge variant="secondary">{STATUS_LABELS[item.status]}</Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent

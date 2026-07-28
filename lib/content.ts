@@ -13,9 +13,24 @@ export type ContentItem = {
   status: ContentStatus;
   updatedAt: string;
   body: string;
+  reviewStatus?: "proposed";
+  proposedBy?: string;
+  proposedAt?: string;
+  proposedRationale?: string;
+  proposedSummary?: string;
+  proposedBody?: string;
 };
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
+
+const PROPOSAL_FIELDS = [
+  "reviewStatus",
+  "proposedBy",
+  "proposedAt",
+  "proposedRationale",
+  "proposedSummary",
+  "proposedBody",
+] as const;
 
 function readMarkdownFile(filePath: string): ContentItem {
   const raw = fs.readFileSync(filePath, "utf-8");
@@ -30,7 +45,38 @@ function readMarkdownFile(filePath: string): ContentItem {
     status: (data.status as ContentStatus) ?? "not_started",
     updatedAt: data.updatedAt ?? "",
     body: content.trim(),
+    reviewStatus: data.reviewStatus,
+    proposedBy: data.proposedBy,
+    proposedAt: data.proposedAt,
+    proposedRationale: data.proposedRationale,
+    proposedSummary: data.proposedSummary,
+    proposedBody: data.proposedBody,
   };
+}
+
+function readRaw(
+  category: string,
+  slug: string
+): { filePath: string; frontmatter: Record<string, unknown>; body: string } {
+  const filePath = path.join(CONTENT_DIR, category, `${slug}.md`);
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Content item not found: ${category}/${slug}`);
+  }
+
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const { data, content } = matter(raw);
+
+  return { filePath, frontmatter: data, body: content };
+}
+
+function writeRaw(
+  filePath: string,
+  frontmatter: Record<string, unknown>,
+  body: string
+): void {
+  const fileContents = matter.stringify(body.trim() + "\n", frontmatter);
+  fs.writeFileSync(filePath, fileContents, "utf-8");
 }
 
 /**
@@ -78,14 +124,8 @@ export function saveItem(
   slug: string,
   data: Partial<ContentItem>
 ): void {
-  const filePath = path.join(CONTENT_DIR, category, `${slug}.md`);
-
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Content item not found: ${category}/${slug}`);
-  }
-
-  const raw = fs.readFileSync(filePath, "utf-8");
-  const { data: existingFrontmatter, content: existingBody } = matter(raw);
+  const { filePath, frontmatter: existingFrontmatter, body: existingBody } =
+    readRaw(category, slug);
 
   const nextFrontmatter = {
     ...existingFrontmatter,
@@ -101,7 +141,97 @@ export function saveItem(
 
   const nextBody = data.body !== undefined ? data.body : existingBody;
 
-  const fileContents = matter.stringify(nextBody.trim() + "\n", nextFrontmatter);
+  writeRaw(filePath, nextFrontmatter, nextBody);
+}
 
-  fs.writeFileSync(filePath, fileContents, "utf-8");
+export type ProposeChangeInput = {
+  agent: string;
+  rationale: string;
+  body?: string;
+  summary?: string;
+};
+
+/**
+ * Records a pending proposal from an external agent/skill in the item's
+ * frontmatter. Never touches title/summary/status/body/updatedAt directly —
+ * the founder must accept the proposal for it to become real content.
+ */
+export function proposeChange(
+  category: string,
+  slug: string,
+  input: ProposeChangeInput
+): ContentItem {
+  const { filePath, frontmatter, body } = readRaw(category, slug);
+
+  const nextFrontmatter: Record<string, unknown> = {
+    ...frontmatter,
+    reviewStatus: "proposed",
+    proposedBy: input.agent,
+    proposedAt: new Date().toISOString(),
+    proposedRationale: input.rationale,
+  };
+
+  if (input.body !== undefined) {
+    nextFrontmatter.proposedBody = input.body;
+  }
+  if (input.summary !== undefined) {
+    nextFrontmatter.proposedSummary = input.summary;
+  }
+
+  writeRaw(filePath, nextFrontmatter, body);
+
+  return readMarkdownFile(filePath);
+}
+
+/**
+ * Accepts the pending proposal: proposedBody/proposedSummary (if present)
+ * become the item's body/summary, updatedAt is refreshed, and all proposal
+ * fields are removed from the frontmatter.
+ */
+export function acceptProposal(category: string, slug: string): ContentItem {
+  const { filePath, frontmatter, body } = readRaw(category, slug);
+
+  if (frontmatter.reviewStatus !== "proposed") {
+    throw new Error(`No pending proposal for ${category}/${slug}`);
+  }
+
+  const nextFrontmatter: Record<string, unknown> = { ...frontmatter };
+  const nextBody =
+    typeof frontmatter.proposedBody === "string"
+      ? frontmatter.proposedBody
+      : body;
+
+  if (typeof frontmatter.proposedSummary === "string") {
+    nextFrontmatter.summary = frontmatter.proposedSummary;
+  }
+  nextFrontmatter.updatedAt = new Date().toISOString().slice(0, 10);
+
+  for (const field of PROPOSAL_FIELDS) {
+    delete nextFrontmatter[field];
+  }
+
+  writeRaw(filePath, nextFrontmatter, nextBody);
+
+  return readMarkdownFile(filePath);
+}
+
+/**
+ * Discards the pending proposal without touching the item's actual content.
+ */
+export function rejectProposal(category: string, slug: string): ContentItem {
+  const { filePath, frontmatter, body } = readRaw(category, slug);
+
+  if (frontmatter.reviewStatus !== "proposed") {
+    throw new Error(`No pending proposal for ${category}/${slug}`);
+  }
+
+  const nextFrontmatter: Record<string, unknown> = { ...frontmatter };
+
+  for (const field of PROPOSAL_FIELDS) {
+    delete nextFrontmatter[field];
+  }
+
+  writeRaw(filePath, nextFrontmatter, body);
+
+  return readMarkdownFile(filePath);
 }

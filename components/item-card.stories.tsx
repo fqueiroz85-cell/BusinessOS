@@ -54,3 +54,20 @@ export const NotStarted: Story = {
     item: { ...sampleItem, status: "not_started", title: "Fluxo de Caixa" },
   },
 };
+
+export const ProposalPending: Story = {
+  args: {
+    variant: "grid",
+    item: {
+      ...sampleItem,
+      title: "Mapa do Mercado",
+      reviewStatus: "proposed",
+      proposedBy: "skill:mapa-do-mercado",
+      proposedAt: "2026-07-27T14:32:00.000Z",
+      proposedRationale:
+        "Encontrei um relatório setorial mais recente com números atualizados de TAM/SAM/SOM.",
+      proposedSummary:
+        "Tamanho, dinâmica e concorrência do mercado, atualizados com dados do relatório setorial de 2026.",
+    },
+  },
+};
