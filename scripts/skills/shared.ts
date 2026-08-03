@@ -17,6 +17,15 @@ export type ContentItem = {
   proposedRationale?: string;
   proposedSummary?: string;
   proposedBody?: string;
+  // Respostas do founder ao questionário do item (lib/questions.ts). É aqui —
+  // e não em `body`, que guarda só o template — que mora o conteúdo real que
+  // o founder escreveu, então todo agente precisa lê-las.
+  answers?: Record<string, string>;
+  briefing?: string;
+  // Presente quando uma proposta de agente já foi aceita neste item: sinaliza
+  // que `body` virou conteúdo real, e não mais o template do scaffold.
+  acceptedFrom?: string;
+  acceptedAt?: string;
 };
 
 export type BusinessContext = {

@@ -1,15 +1,14 @@
 import {
-  fetchContext,
-  proposeWrite,
-  runClaude,
-  formatarItens,
   criarLogger,
+  fetchContext,
+  formatarItens,
+  runClaude,
+  stripCodeFence,
+  todosOsItens,
   tratarFalha,
-  type BusinessContext,
-  type ContentItem,
 } from "./shared";
 
-const AGENT = "agent:auditor-coerencia";
+const AGENT = "agent:context-linter";
 const log = criarLogger(AGENT);
 
 const SYSTEM_PROMPT = `Você é um auditor de coerência estratégica. Você lê o "sistema operacional" de negócio de um founder solo brasileiro por inteiro e aponta onde as partes se contradizem.
@@ -24,8 +23,9 @@ O que você procura:
 
 O que você NÃO faz:
 - Não reescreve o conteúdo do founder. Você aponta, ele decide.
-- Não inventa contradições para parecer útil. Se o negócio está coerente (ou vazio demais para julgar), diga isso e devolva listas vazias.
+- Não inventa contradições para parecer útil. Se o negócio está coerente (ou vazio demais para julgar), diga isso e devolva lista vazia.
 - Não confunde "incompleto" com "incoerente". Item vazio não é contradição.
+- Não comenta resumos desatualizados — isso é trabalho do agent:summarizer.
 
 Escreva em português do Brasil.`;
 
@@ -40,17 +40,8 @@ const FORMATO_AUDITORIA = `Responda APENAS com um objeto JSON válido, sem cerca
       "descricao": "o que exatamente se contradiz, citando o que cada item diz",
       "sugestao": "o que o founder deveria decidir ou revisar"
     }
-  ],
-  "resumosDesatualizados": [
-    {
-      "item": "categoria/slug",
-      "summaryProposto": "novo resumo de 1 linha que reflete o corpo atual do item",
-      "motivo": "por que o resumo atual não representa mais o conteúdo"
-    }
   ]
-}
-
-Em "resumosDesatualizados", inclua apenas itens cujo resumo realmente divergiu do corpo. Se nenhum divergiu, devolva lista vazia.`;
+}`;
 
 type Contradicao = {
   gravidade: "alta" | "media" | "baixa";
@@ -60,40 +51,13 @@ type Contradicao = {
   sugestao: string;
 };
 
-type ResumoDesatualizado = {
-  item: string;
-  summaryProposto: string;
-  motivo: string;
-};
-
-type Auditoria = {
-  contradicoes: Contradicao[];
-  resumosDesatualizados: ResumoDesatualizado[];
-};
-
-function stripCodeFence(text: string): string {
-  const fenced = text.match(/```(?:json)?\s*\n([\s\S]*?)\n```/);
-  return fenced ? fenced[1].trim() : text.trim();
-}
-
-function todosOsItens(context: BusinessContext): ContentItem[] {
-  return [
-    ...context.categories.founder,
-    ...context.categories.direcao,
-    ...context.categories.validacao,
-    ...context.categories.caixa,
-  ];
-}
-
 const ORDEM_GRAVIDADE: Record<Contradicao["gravidade"], number> = {
   alta: 0,
   media: 1,
   baixa: 2,
 };
 
-function imprimirRelatorio(auditoria: Auditoria): void {
-  const { contradicoes } = auditoria;
-
+function imprimirRelatorio(contradicoes: Contradicao[]): void {
   console.log("");
   console.log("═".repeat(72));
   console.log("  RELATÓRIO DE COERÊNCIA — BusinessOS");
@@ -149,66 +113,21 @@ ${FORMATO_AUDITORIA}`;
   log("Chamando o Claude Code para auditar (pode levar um tempo)...");
   const raw = await runClaude(SYSTEM_PROMPT, userPrompt);
 
-  let auditoria: Auditoria;
+  let payload: { contradicoes?: Contradicao[] };
 
   try {
-    auditoria = JSON.parse(stripCodeFence(raw)) as Auditoria;
+    payload = JSON.parse(stripCodeFence(raw)) as { contradicoes?: Contradicao[] };
   } catch {
     throw new Error(
       `A resposta do modelo não é JSON válido. Recebido (primeiros 300 caracteres):\n${stripCodeFence(raw).slice(0, 300)}`
     );
   }
 
-  auditoria.contradicoes ??= [];
-  auditoria.resumosDesatualizados ??= [];
+  imprimirRelatorio(payload.contradicoes ?? []);
 
-  imprimirRelatorio(auditoria);
-
-  // A única escrita que este agente pode fazer é `summary` (agents.config.json
-  // declara writeFields: ["summary"]). O corpo do negócio é do founder — o
-  // auditor aponta contradições no console, não reescreve conteúdo.
-  if (auditoria.resumosDesatualizados.length === 0) {
-    log("Nenhum resumo desatualizado. Nada a propor.");
-    return;
-  }
-
-  const porChave = new Map(
-    itens.map((item) => [`${item.category}/${item.slug}`, item])
-  );
-
-  let propostas = 0;
-
-  for (const resumo of auditoria.resumosDesatualizados) {
-    const item = porChave.get(resumo.item);
-
-    if (!item) {
-      log(`Ignorando "${resumo.item}": item não existe no contexto.`);
-      continue;
-    }
-
-    if (item.reviewStatus === "proposed") {
-      log(
-        `Ignorando ${resumo.item}: já tem proposta pendente de ${item.proposedBy}.`
-      );
-      continue;
-    }
-
-    await proposeWrite({
-      category: item.category,
-      slug: item.slug,
-      agent: AGENT,
-      rationale: `Resumo desatualizado: ${resumo.motivo}`,
-      summary: resumo.summaryProposto,
-    });
-
-    propostas += 1;
-  }
-
-  log(
-    propostas > 0
-      ? `Concluído. ${propostas} proposta(s) de resumo aguardando sua revisão no BusinessOS.`
-      : "Concluído. Nenhuma proposta nova registrada."
-  );
+  // Este agente não escreve nada — agents.config.json declara writes: []. O
+  // produto dele é o relatório acima; o corpo do negócio é do founder.
+  log("Concluído. Nenhuma escrita proposta — este agente só aponta.");
 }
 
 main().catch((err) => tratarFalha(AGENT, err));

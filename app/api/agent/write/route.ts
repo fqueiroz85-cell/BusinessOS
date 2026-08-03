@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { proposeChange } from "@/lib/content";
+import {
+  InvalidItemPathError,
+  ProposalPendingError,
+  proposeChange,
+} from "@/lib/content";
 import { canAgentWrite } from "@/lib/agents";
 
 type AgentWritePayload = {
@@ -56,6 +60,20 @@ export async function POST(request: Request) {
   try {
     item = proposeChange(category, slug, { agent, rationale, body, summary });
   } catch (err) {
+    if (err instanceof InvalidItemPathError) {
+      return NextResponse.json(
+        { success: false, error: err.message },
+        { status: 400 }
+      );
+    }
+
+    if (err instanceof ProposalPendingError) {
+      return NextResponse.json(
+        { success: false, error: err.message },
+        { status: 409 }
+      );
+    }
+
     const message =
       err instanceof Error ? err.message : "Erro ao propor mudança.";
     return NextResponse.json({ success: false, error: message }, { status: 404 });

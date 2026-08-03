@@ -202,7 +202,8 @@ Considerações adicionais:
 - **Escopo de permissão por skill** (mencionado na seção 1): cada skill deve declarar explicitamente quais `category`/`slug` pode propor mudanças — não existe skill com acesso irrestrito a `content/`. Essa validação acontece no lado do BusinessOS (na rota de escrita), não confiando apenas na boa conduta do agente externo.
 - **Nunca sobrescrever silenciosamente conteúdo com `status: "done"`** sem sinalizar isso de forma destacada na revisão — um item que Felipe já marcou como concluído merece mais fricção antes de ser alterado por um agente.
 - **Auditoria mínima**: `proposedBy` + `proposedAt` + `proposedRationale` (ou um log separado, se o volume justificar) são suficientes na escala de um founder solo; não é necessário um sistema de auditoria complexo nesta fase.
-- **Sem autenticação hoje** (consistente com o restante da v1 — ver `docs/prd.md`, seção "Fora de escopo"): como o BusinessOS roda localmente e sem login, `/api/context` e a futura `/api/agent/write` não têm controle de acesso. Isso é aceitável apenas enquanto o app roda localmente; se/quando for exposto publicamente (ex. após migração para Supabase, seção 6), essas rotas precisam de autenticação antes de aceitar escrita — leitura pública de `/api/context` também deveria ser reavaliada nesse momento, já que o conteúdo pode incluir informação estratégica sensível do negócio.
+- **`category`/`slug` são validados em `lib/content.ts`** (`itemPath`), contra a lista fixa de 4 categorias e o padrão `^[a-z0-9-]+$`. Sem isso, `path.join(CONTENT_DIR, category, slug + ".md")` resolve `..` e escreve fora de `content/` — um `POST /api/content` com `category: ".."` gravava na raiz do repositório, e daí em qualquer lugar onde o processo Node tenha permissão, inclusive por cima do código-fonte. A validação fica na camada de dados, e não nas rotas, porque é o único ponto por onde os dois caminhos de escrita passam; validar só em uma rota deixaria a outra aberta. Vale notar que `POST /api/agent/write` já resistia a esse ataque antes da correção, por acidente feliz do modelo de permissões: nenhum agente declara escopo com `..`, então `canAgentWrite` devolvia 403. O buraco estava no caminho humano, que não passa por permissão nenhuma.
+- **Sem autenticação hoje** (consistente com o restante da v1 — ver `docs/prd.md`, seção "Fora de escopo"): como o BusinessOS roda localmente e sem login, `/api/context` e a futura `/api/agent/write` não têm controle de acesso. Isso torna o parágrafo acima mais relevante do que parece: sem auth e sem checagem de origem, qualquer página aberta no navegador consegue fazer POST para `localhost:3000` enquanto o dev server está no ar. Isso é aceitável apenas enquanto o app roda localmente; se/quando for exposto publicamente (ex. após migração para Supabase, seção 6), essas rotas precisam de autenticação antes de aceitar escrita — leitura pública de `/api/context` também deveria ser reavaliada nesse momento, já que o conteúdo pode incluir informação estratégica sensível do negócio.
 
 ---
 
@@ -230,7 +231,7 @@ Conforme `docs/spec.md` (seção 10), a camada `lib/content.ts` é o único pont
 
 ### Fase 3 — Agentes com permissões granulares (implementada nesta mudança)
 
-- **Quatro agentes** em `scripts/agents/`, cada um dono de um domínio do negócio, todos usando o Claude Code CLI como motor de raciocínio (seção 10).
+- **Onze agentes** em `scripts/agents/`, um por item de conteúdo (com exceções documentadas na seção 12), quase todos usando o Claude Code CLI como motor de raciocínio (seção 10).
 - **Permissões granulares** por agente em `agents.config.json`, validadas server-side em `POST /api/agent/write` (seção 11).
 - **Decisão própria sobre o alvo**: diferente das skills da Fase 2 — que recebem `category`/`slug` fixos no código —, cada agente lê `/api/context` e *decide sozinho* em qual item agir. É essa decisão que o torna um agente e não uma skill (seção 1).
 - **Ainda sob comando manual** (`npm run agent:*`). Execução agendada/autônoma continua fora de escopo: o passo que falta é um scheduler, não uma mudança de arquitetura — os agentes já decidem sozinhos *o que* fazer, só não decidem *quando* rodar.
@@ -284,10 +285,10 @@ Decisões de implementação que não são óbvias:
 Cada agente declara, em `agents.config.json`, o que pode ler e onde pode propor escrita:
 
 ```jsonc
-"agent:coach-direcao": {
+"agent:market-map": {
   "description": "...",
   "reads": ["founder/*", "direcao/*"],
-  "writes": ["direcao/*"],
+  "writes": ["direcao/mapa-do-mercado"],
   "writeFields": ["body", "summary"]
 }
 ```
@@ -296,25 +297,44 @@ Escopos usam a notação `categoria/slug` (item específico) ou `categoria/*` (c
 
 **A validação roda no lado do BusinessOS**, em `lib/agents.ts`, chamado por `POST /api/agent/write` antes de qualquer escrita — não nos scripts de agente. Essa distinção é o ponto inteiro do mecanismo: um agente externo mal-comportado, com um bug de prompt, ou escrito por outra pessoa não deve conseguir escrever fora do escopo declarado. A checagem **falha fechada**: agente ausente de `agents.config.json` não escreve em lugar nenhum, e a rota responde `403`.
 
-`writeFields` é a segunda dimensão, e é o que viabiliza a "mudança de baixo risco" antecipada na seção 5: `agent:auditor-coerencia` lê o negócio inteiro mas só pode propor `summary` — ele nunca reescreve o corpo de nenhum item, mesmo que o modelo tente. Isso é aplicado pela rota, não pela boa conduta do script.
+`writeFields` é a segunda dimensão, e é o que viabiliza a "mudança de baixo risco" antecipada na seção 5: `agent:summarizer` lê o negócio inteiro mas só pode propor `summary` — ele nunca reescreve o corpo de nenhum item, mesmo que o modelo tente. Mesmo mecanismo protege `founder/*`, onde `agent:founder-coach` também é limitado a `summary`: as respostas do founder não podem ser sobrescritas por um agente. Isso é aplicado pela rota, não pela boa conduta do script.
+
+Um agente pode declarar `writes: []`, e aí não escreve em lugar nenhum — é o caso de `agent:seed-assistant` e `agent:context-linter`, cujo produto é um relatório no console. A checagem falha fechada, então lista vazia significa exatamente isso.
 
 Revisão humana continua obrigatória para toda escrita de agente, inclusive as de `summary`: `agents.config.json` restringe *onde* um agente pode propor, não remove o passo de aceitar/rejeitar da seção 5.
 
-## 12. Os quatro agentes
+## 12. Os onze agentes
 
-Todos rodam sob comando manual, dependem do servidor Next.js no ar (`BUSINESSOS_URL`, padrão `http://localhost:3000`), e param sem propor nada se já houver uma proposta pendente na sua categoria — para não enfileirar propostas em cima de propostas.
+Todos rodam sob comando manual, dependem do servidor Next.js no ar (`BUSINESSOS_URL`, padrão `http://localhost:3000`), e param sem propor nada se já houver uma proposta pendente em um item sob sua responsabilidade — para não enfileirar propostas em cima de propostas.
 
 | Agente | Comando | Lê | Propõe em |
 |---|---|---|---|
-| `agent:coach-direcao` | `npm run agent:direcao` | `founder/*`, `direcao/*` | `direcao/*` (body + summary) |
-| `agent:coach-validacao` | `npm run agent:validacao` | `direcao/*`, `validacao/*` | `validacao/*` (body + summary) |
-| `agent:analista-caixa` | `npm run agent:caixa` | `founder/*`, `caixa/*` | `caixa/*` (body + summary) |
-| `agent:auditor-coerencia` | `npm run agent:auditor` | tudo | apenas `summary`, em qualquer item |
+| `agent:seed-assistant` | `npm run agent:seed` | tudo | nada (só orienta) |
+| `agent:founder-coach` | `npm run agent:founder` | `founder/*` | apenas `summary` em `founder/*` |
+| `agent:market-map` | `npm run agent:market` | `founder/*`, `direcao/*` | `direcao/mapa-do-mercado` |
+| `agent:problem-magnet` | `npm run agent:problemas` | `founder/*`, `direcao/*` | `direcao/mapa-de-problemas` |
+| `agent:icp` | `npm run agent:icp` | `founder/*`, `direcao/*` | `direcao/perfil-ideal-de-cliente` |
+| `agent:value-thesis` | `npm run agent:tese` | `founder/*`, `direcao/*` | `direcao/tese-de-valor` |
+| `agent:offer-strategist` | `npm run agent:oferta` | `founder/*`, `direcao/*` | `direcao/oferta` |
+| `agent:validation-synth` | `npm run agent:validacao` | `direcao/*`, `validacao/*` | `validacao/*` |
+| `agent:cash-flow` | `npm run agent:caixa` | `founder/*`, `direcao/*`, `caixa/*` | `caixa/*` |
+| `agent:summarizer` | `npm run agent:summarizer` | tudo | apenas `summary`, em qualquer item |
+| `agent:context-linter` | `npm run agent:linter` | tudo | nada (só aponta) |
 
-**`agent:coach-direcao`** trata a Direção como uma cadeia causal — Mapa do Mercado → Mapa de Problemas → Perfil Ideal de Cliente → Tese de Valor → Oferta — e ataca o primeiro elo ainda não preenchido, passando apenas os elos *anteriores* como contexto (os posteriores dependem deste item, não o contrário). Com a cadeia inteira preenchida, ele escolhe o item parado há mais tempo.
+### Um agente por item, e a cadeia que sobrevive a isso
 
-**`agent:coach-validacao`** aplica um gate antes de agir: se `direcao/oferta` e `direcao/tese-de-valor` estiverem vazias, ele para e manda rodar o coach de Direção primeiro — sem hipótese formulada não há o que validar.
+A Direção é uma cadeia causal — Mapa do Mercado → Mapa de Problemas → Perfil Ideal de Cliente → Tese de Valor → Oferta — e cada elo virou um agente próprio, com system prompt especializado no seu item. O que impede isso de virar cinco agentes desconexos é o **gate da cadeia** (`gateDaCadeia` em `scripts/agents/shared.ts`): um agente para sem propor nada se algum elo anterior ao seu ainda estiver vazio, e o contexto que ele recebe contém apenas os elos *anteriores* — os posteriores dependem dele, não o contrário.
 
-**`agent:analista-caixa`** cruza `caixa/*` com `founder/estilo-de-vida` para checar se o plano de caixa sustenta a renda alvo declarada. Essa é a razão de ele ler `founder/*`: o achado mais importante de um caixa de founder solo costuma ser a distância entre o que o negócio caminha para pagar e o que a vida do founder custa.
+`agent:validation-synth` aplica um gate diferente, entre seções: se `direcao/oferta` e `direcao/tese-de-valor` estiverem vazias, ele para e manda rodar os agentes da Direção primeiro. Sem hipótese formulada não há o que validar.
 
-**`agent:auditor-coerencia`** é o único que lê o negócio inteiro de uma vez, e o único cujo produto principal não é conteúdo: ele imprime no console um relatório de contradições entre seções (ex. a oferta desenhada em Direção não é a que está sendo validada; o ICP descrito não é o cliente que apareceu em Primeiros Clientes). Só propõe atualização de `summary`, e apenas quando o resumo de um item divergiu do corpo. O corpo do negócio é do founder — o auditor aponta, ele decide.
+### A espinha dorsal compartilhada
+
+Oito dos onze agentes fazem a mesma coisa em sequência: ler o contexto, checar o gate, escolher o alvo, montar o prompt, chamar o Claude e registrar a proposta. Isso vive uma única vez em `rodarAgenteDeItem` (`scripts/agents/shared.ts`); cada arquivo de agente declara só o que o diferencia — system prompt, contexto cruzado relevante, gate e instrução final. Um agente típico tem ~35 linhas, quase todas prompt.
+
+Os três restantes têm formato próprio porque seu produto não é o corpo de um item:
+
+**`agent:seed-assistant`** é o ponto de entrada para quem abre o BusinessOS do zero: mostra o preenchimento das 4 seções, aponta o próximo item na ordem de dependência e diz qual comando rodar. É o **único agente que não chama o Claude Code CLI** — tudo que ele responde é determinístico, e um comando de orientação que consome cota da assinatura toda vez que você quer se situar não seria usado. Se houver proposta pendente, ele interrompe e manda revisar antes de qualquer outra coisa.
+
+**`agent:founder-coach`** é o único que trata a seção Founder, e o único proibido por desenho de escrever conteúdo: as respostas de `founder/*` são o dado bruto de que todo o resto depende, e um agente que as reescreve faz o negócio inteiro se apoiar numa invenção sua. Ele aponta o que está vago, faz a pergunta seguinte e nomeia as tensões entre objetivo, ambição e tempo declarado. `writeFields: ["summary"]`.
+
+**`agent:summarizer`** e **`agent:context-linter`** dividem o que antes era um auditor só: o primeiro reescreve os resumos de uma linha dos itens que já têm conteúdo (`writeFields: ["summary"]`); o segundo procura contradições entre seções e não escreve nada (`writes: []`). Separá-los evita que uma auditoria de coerência fique disputando atenção com uma limpeza de resumo — são cadências diferentes.

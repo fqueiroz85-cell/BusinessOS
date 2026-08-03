@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { saveItem } from "@/lib/content";
+import { InvalidItemPathError, saveItem } from "@/lib/content";
 import type { ContentStatus } from "@/lib/content";
 
 type ContentPayload = {
@@ -44,6 +44,16 @@ export async function POST(request: Request) {
       updatedAt: new Date().toISOString().slice(0, 10),
     });
   } catch (err) {
+    // category/slug malformados são erro do cliente (400), não "não existe"
+    // (404) — devolver 404 para `category: ".."` mascarava uma tentativa de
+    // path traversal como um item ausente qualquer.
+    if (err instanceof InvalidItemPathError) {
+      return NextResponse.json(
+        { success: false, error: err.message },
+        { status: 400 }
+      );
+    }
+
     const message = err instanceof Error ? err.message : "Erro ao salvar.";
     return NextResponse.json({ success: false, error: message }, { status: 404 });
   }

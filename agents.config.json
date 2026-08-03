@@ -1,29 +1,71 @@
 {
-  "comment": "Registro de permissoes por agente (Fase 3 de docs/agents-integration.md). Cada agente declara explicitamente o que pode ler e onde pode propor escrita. A validacao acontece no lado do BusinessOS (lib/agents.ts, chamado por POST /api/agent/write), nao confiando na boa conduta do agente externo. Escopos usam a notacao 'categoria/slug' ou 'categoria/*'.",
+  "comment": "Registro de permissoes por agente (Fase 3 de docs/agents-integration.md). Cada agente declara explicitamente o que pode ler e onde pode propor escrita. A validacao acontece no lado do BusinessOS (lib/agents.ts, chamado por POST /api/agent/write), nao confiando na boa conduta do agente externo. Escopos usam a notacao 'categoria/slug' ou 'categoria/*'. Um agente com writes vazio nao escreve em lugar nenhum — seu produto e o relatorio no console.",
   "agents": {
-    "agent:coach-direcao": {
-      "description": "Percorre a cadeia causal da Direcao (Mapa do Mercado -> Mapa de Problemas -> Perfil Ideal de Cliente -> Tese de Valor -> Oferta), identifica o elo mais fraco e propoe conteudo para ele usando os itens anteriores da cadeia como contexto.",
+    "agent:founder-coach": {
+      "description": "Le a secao Founder e devolve coaching: o que ja sustenta decisao, o que esta vago demais, e as tensoes entre objetivo, ambicao e tempo disponivel. Nao reescreve as respostas do founder — elas sao o dado bruto de que o resto do negocio depende. So propoe 'summary'.",
+      "reads": ["founder/*"],
+      "writes": ["founder/*"],
+      "writeFields": ["summary"]
+    },
+    "agent:market-map": {
+      "description": "Primeiro elo da Direcao. Descreve o mercado em que o founder vai competir, comecando pelo recorte, usando founder/* para saber que tamanho de mercado faz sentido perseguir.",
       "reads": ["founder/*", "direcao/*"],
-      "writes": ["direcao/*"],
+      "writes": ["direcao/mapa-do-mercado"],
       "writeFields": ["body", "summary"]
     },
-    "agent:coach-validacao": {
-      "description": "Traduz as hipoteses de Direcao em experimentos concretos de validacao e organiza o aprendizado dos primeiros clientes. Nao propoe nada enquanto direcao/oferta estiver vazia — sem hipotese nao ha o que validar.",
+    "agent:problem-magnet": {
+      "description": "Segundo elo da Direcao. Mapeia os problemas reais do mercado descrito e os ordena por dor, registrando o que a pessoa ja gasta hoje para contornar cada um.",
+      "reads": ["founder/*", "direcao/*"],
+      "writes": ["direcao/mapa-de-problemas"],
+      "writeFields": ["body", "summary"]
+    },
+    "agent:icp": {
+      "description": "Terceiro elo da Direcao. Define o Perfil Ideal de Cliente a partir dos problemas mapeados, com criterios verificaveis e um anti-ICP explicito.",
+      "reads": ["founder/*", "direcao/*"],
+      "writes": ["direcao/perfil-ideal-de-cliente"],
+      "writeFields": ["body", "summary"]
+    },
+    "agent:value-thesis": {
+      "description": "Quarto elo da Direcao. Formula a Tese de Valor como afirmacao contestavel, nomeia o mecanismo e separa premissas com evidencia das que ainda sao fe.",
+      "reads": ["founder/*", "direcao/*"],
+      "writes": ["direcao/tese-de-valor"],
+      "writeFields": ["body", "summary"]
+    },
+    "agent:offer-strategist": {
+      "description": "Quinto elo da Direcao. Traduz a tese em oferta concreta (escopo, preco, razao para comprar agora) e checa se um founder solo consegue entrega-la dentro do tempo declarado em founder/estilo-de-vida.",
+      "reads": ["founder/*", "direcao/*"],
+      "writes": ["direcao/oferta"],
+      "writeFields": ["body", "summary"]
+    },
+    "agent:validation-synth": {
+      "description": "Cuida da Validacao inteira (oferta e primeiros clientes). Transforma as hipoteses da Direcao em experimentos com criterio de falha explicito. Nao age enquanto direcao/oferta e direcao/tese-de-valor estiverem vazias — sem hipotese nao ha o que validar.",
       "reads": ["direcao/*", "validacao/*"],
       "writes": ["validacao/*"],
       "writeFields": ["body", "summary"]
     },
-    "agent:analista-caixa": {
-      "description": "Estrutura o Fluxo de Caixa e o ERP, cruzando com founder/estilo-de-vida para checar se o plano de caixa sustenta a renda alvo e o estilo de vida desejado.",
-      "reads": ["founder/*", "caixa/*"],
+    "agent:cash-flow": {
+      "description": "Cuida do Caixa inteiro (fluxo de caixa e ERP), cruzando com founder/estilo-de-vida para checar se o plano de caixa sustenta a renda alvo, e com direcao/oferta para saber de onde vem a entrada.",
+      "reads": ["founder/*", "direcao/*", "caixa/*"],
       "writes": ["caixa/*"],
       "writeFields": ["body", "summary"]
     },
-    "agent:auditor-coerencia": {
-      "description": "Le o negocio inteiro e aponta contradicoes entre secoes (ex. direcao/oferta vs validacao/oferta, ICP vs primeiros clientes, premissas de caixa vs estilo de vida). Reporta as contradicoes no console e so pode propor atualizacao de 'summary' — nunca reescreve o corpo de nenhum item.",
+    "agent:seed-assistant": {
+      "description": "Assistente inicial, para comecar do zero. Mostra o progresso das 4 secoes, aponta o proximo item a preencher na ordem de dependencia e diz qual comando rodar. Unico agente que nao chama o Claude Code CLI: a resposta e deterministica, entao custa zero de cota.",
+      "reads": ["founder/*", "direcao/*", "validacao/*", "caixa/*"],
+      "writes": [],
+      "writeFields": []
+    },
+    "agent:summarizer": {
+      "description": "Reescreve os resumos de uma linha dos itens que ja tem conteudo real, para que digam o que o item AFIRMA e nao sobre o que ele fala. So propoe 'summary', e ignora itens ainda vazios.",
       "reads": ["founder/*", "direcao/*", "validacao/*", "caixa/*"],
       "writes": ["founder/*", "direcao/*", "validacao/*", "caixa/*"],
       "writeFields": ["summary"]
+    },
+    "agent:context-linter": {
+      "description": "Le o negocio inteiro e aponta contradicoes entre secoes (ex. direcao/oferta vs validacao/oferta, ICP vs primeiros clientes, premissas de caixa vs estilo de vida). Produto e um relatorio no console: nao escreve nada, writes vazio.",
+      "reads": ["founder/*", "direcao/*", "validacao/*", "caixa/*"],
+      "writes": [],
+      "writeFields": []
     },
     "skill:mapa-do-mercado": {
       "description": "Skill de referencia da Fase 2 — propoe um esqueleto estruturado de Mapa do Mercado, sem chamar IA.",

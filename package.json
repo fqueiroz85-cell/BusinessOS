@@ -11,10 +11,17 @@
     "build-storybook": "storybook build",
     "skill:mapa-do-mercado": "tsx scripts/skills/mapa-do-mercado.ts",
     "skill:tese-de-valor": "tsx scripts/skills/tese-de-valor.ts",
-    "agent:direcao": "tsx scripts/agents/coach-direcao.ts",
-    "agent:validacao": "tsx scripts/agents/coach-validacao.ts",
-    "agent:caixa": "tsx scripts/agents/analista-caixa.ts",
-    "agent:auditor": "tsx scripts/agents/auditor-coerencia.ts"
+    "agent:seed": "tsx scripts/agents/seed-assistant.ts",
+    "agent:founder": "tsx scripts/agents/founder-coach.ts",
+    "agent:market": "tsx scripts/agents/market-map.ts",
+    "agent:problemas": "tsx scripts/agents/problem-magnet.ts",
+    "agent:icp": "tsx scripts/agents/icp.ts",
+    "agent:tese": "tsx scripts/agents/value-thesis.ts",
+    "agent:oferta": "tsx scripts/agents/offer-strategist.ts",
+    "agent:validacao": "tsx scripts/agents/validation-synth.ts",
+    "agent:caixa": "tsx scripts/agents/cash-flow.ts",
+    "agent:summarizer": "tsx scripts/agents/summarizer.ts",
+    "agent:linter": "tsx scripts/agents/context-linter.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

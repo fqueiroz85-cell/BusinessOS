@@ -15,16 +15,30 @@ O conteúdo do negócio (objetivo, direção, validação e caixa) é salvo como
 
 ## Agentes
 
-Quatro agentes leem o contexto do negócio via `GET /api/context`, decidem sozinhos em qual item agir e propõem conteúdo usando o Claude Code CLI. Nenhum deles escreve direto: toda proposta fica pendente de aceite ou rejeição na própria interface — **agentes propõem, o founder dispõe**.
+Onze agentes leem o contexto do negócio via `GET /api/context`, decidem sozinhos em qual item agir e propõem conteúdo usando o Claude Code CLI. Nenhum deles escreve direto: toda proposta fica pendente de aceite ou rejeição na própria interface — **agentes propõem, o founder dispõe**.
 
 Com o servidor rodando (`npm run dev`), em outro terminal:
 
 ```bash
-npm run agent:direcao     # constrói a cadeia Mercado → Problemas → ICP → Tese → Oferta
+npm run agent:seed        # por onde começar: progresso das 4 seções e o próximo passo
+
+npm run agent:founder     # coaching sobre suas respostas de Objetivo e Estilo de Vida
+
+# A Direção é uma cadeia: cada agente exige o elo anterior preenchido.
+npm run agent:market      # Mapa do Mercado — o recorte antes do tamanho
+npm run agent:problemas   # Ímã de Problemas — ordenados por dor
+npm run agent:icp         # Perfil Ideal de Cliente, com anti-ICP
+npm run agent:tese        # Tese de Valor como afirmação contestável
+npm run agent:oferta      # Oferta concreta: escopo, preço, razão para comprar agora
+
 npm run agent:validacao   # transforma as hipóteses de Direção em experimentos
 npm run agent:caixa       # estrutura fluxo de caixa e ERP contra o estilo de vida desejado
-npm run agent:auditor     # relatório de contradições entre as seções
+
+npm run agent:summarizer  # reescreve os resumos de uma linha dos itens já preenchidos
+npm run agent:linter      # relatório de contradições entre as seções
 ```
+
+`agent:seed` é o único que não chama o CLI — a resposta dele é determinística, então custa zero de cota e serve para você se situar a qualquer momento.
 
 Requer o [Claude Code](https://claude.com/claude-code) instalado e logado — as chamadas rodam sob a assinatura Claude, sem chave de API paga por token. Detalhes de arquitetura, permissões e contrato em `docs/agents-integration.md`.
 

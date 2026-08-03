@@ -22,9 +22,58 @@ export type ContentItem = {
   answers?: Record<string, string>;
   briefing?: string;
   briefingGeneratedAt?: string;
+  // Rastro de uma proposta de agente já aceita. Sobrevive à aceitação (ao
+  // contrário dos PROPOSAL_FIELDS, que são apagados) porque é o único sinal de
+  // que o `body` deixou de ser o template inicial e passou a ter conteúdo real.
+  acceptedFrom?: string;
+  acceptedAt?: string;
 };
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
+
+/** As 4 categorias fixas da arquitetura de informação (ver docs/prd.md seção 3). */
+export const CATEGORIES = ["founder", "direcao", "validacao", "caixa"] as const;
+
+/** Slug de item: minúsculas, dígitos e hífen. Sem ponto, barra ou espaço. */
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
+ * Monta o caminho de um item validando `category`/`slug` antes.
+ *
+ * Sem isto, `path.join(CONTENT_DIR, category, slug + ".md")` resolve `..` e
+ * escreve fora de content/: um `POST /api/content` com `category: ".."` grava
+ * na raiz do repositório, e daí em qualquer lugar onde o processo Node tenha
+ * permissão de escrita — inclusive por cima do código-fonte. Como o app não tem
+ * autenticação nem checagem de origem na v1, qualquer página aberta no
+ * navegador consegue fazer esse POST enquanto o dev server está no ar.
+ *
+ * A validação vive aqui, e não nas rotas, porque este é o único ponto por onde
+ * todos os caminhos de leitura e escrita passam — humano (POST /api/content) e
+ * agente (POST /api/agent/write). Validar em uma rota só deixaria a outra
+ * aberta.
+ */
+export class InvalidItemPathError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidItemPathError";
+  }
+}
+
+function itemPath(category: string, slug: string): string {
+  if (!(CATEGORIES as readonly string[]).includes(category)) {
+    throw new InvalidItemPathError(
+      `Categoria inválida: "${category}". Esperado uma de: ${CATEGORIES.join(", ")}.`
+    );
+  }
+
+  if (!SLUG_PATTERN.test(slug)) {
+    throw new InvalidItemPathError(
+      `Slug inválido: "${slug}". Use apenas minúsculas, dígitos e hífen.`
+    );
+  }
+
+  return path.join(CONTENT_DIR, category, `${slug}.md`);
+}
 
 const PROPOSAL_FIELDS = [
   "reviewStatus",
@@ -57,6 +106,8 @@ function readMarkdownFile(filePath: string): ContentItem {
     answers: data.answers,
     briefing: data.briefing,
     briefingGeneratedAt: data.briefingGeneratedAt,
+    acceptedFrom: data.acceptedFrom,
+    acceptedAt: data.acceptedAt,
   };
 }
 
@@ -64,7 +115,7 @@ function readRaw(
   category: string,
   slug: string
 ): { filePath: string; frontmatter: Record<string, unknown>; body: string } {
-  const filePath = path.join(CONTENT_DIR, category, `${slug}.md`);
+  const filePath = itemPath(category, slug);
 
   if (!fs.existsSync(filePath)) {
     throw new Error(`Content item not found: ${category}/${slug}`);
@@ -90,6 +141,12 @@ function writeRaw(
  * them as ContentItem records, sorted by their `order` field.
  */
 export function getCategoryItems(category: string): ContentItem[] {
+  // Mesma razão de itemPath: sem isto, `category: ".."` lista os .md da raiz do
+  // repositório. É só leitura, mas continua sendo conteúdo fora de content/.
+  if (!(CATEGORIES as readonly string[]).includes(category)) {
+    return [];
+  }
+
   const categoryDir = path.join(CONTENT_DIR, category);
 
   if (!fs.existsSync(categoryDir)) {
@@ -112,7 +169,15 @@ export function getCategoryItems(category: string): ContentItem[] {
  * Returns null if the file does not exist.
  */
 export function getItem(category: string, slug: string): ContentItem | null {
-  const filePath = path.join(CONTENT_DIR, category, `${slug}.md`);
+  let filePath: string;
+
+  try {
+    filePath = itemPath(category, slug);
+  } catch {
+    // Leitura com category/slug inválidos é "não existe", não erro 500 — as
+    // páginas do app chamam getItem com params vindos da URL.
+    return null;
+  }
 
   if (!fs.existsSync(filePath)) {
     return null;
@@ -133,18 +198,27 @@ export function saveItem(
   const { filePath, frontmatter: existingFrontmatter, body: existingBody } =
     readRaw(category, slug);
 
-  const nextFrontmatter = {
-    ...existingFrontmatter,
+  const atualizacoes: Record<string, unknown> = {
     title: data.title ?? existingFrontmatter.title,
     slug: data.slug ?? existingFrontmatter.slug ?? slug,
     category: data.category ?? existingFrontmatter.category ?? category,
-    order:
-      data.order !== undefined ? data.order : existingFrontmatter.order,
+    order: data.order !== undefined ? data.order : existingFrontmatter.order,
     summary: data.summary ?? existingFrontmatter.summary,
     status: data.status ?? existingFrontmatter.status,
     updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 10),
     answers: data.answers ?? existingFrontmatter.answers,
   };
+
+  // `matter.stringify` serializa com js-yaml, que **lança** ao encontrar
+  // `undefined` ("unacceptable kind of an object to dump"). Escrever a chave
+  // com valor indefinido quebrava o salvamento de todo item que ainda não
+  // tivesse `answers` no frontmatter — 9 dos 11 itens do scaffold. Só entram
+  // no frontmatter as chaves que de fato têm valor.
+  const nextFrontmatter: Record<string, unknown> = { ...existingFrontmatter };
+
+  for (const [chave, valor] of Object.entries(atualizacoes)) {
+    if (valor !== undefined) nextFrontmatter[chave] = valor;
+  }
 
   const nextBody = data.body !== undefined ? data.body : existingBody;
 
@@ -159,6 +233,22 @@ export type ProposeChangeInput = {
 };
 
 /**
+ * Lançado quando um agente tenta propor mudança em um item que já tem proposta
+ * aguardando revisão. Tipo próprio para a rota poder responder 409 em vez de
+ * confundir com "item não encontrado".
+ */
+export class ProposalPendingError extends Error {
+  constructor(category: string, slug: string, proposedBy: unknown) {
+    super(
+      `${category}/${slug} já tem uma proposta pendente de ${
+        proposedBy ?? "um agente"
+      }. Aceite ou rejeite antes de propor outra.`
+    );
+    this.name = "ProposalPendingError";
+  }
+}
+
+/**
  * Records a pending proposal from an external agent/skill in the item's
  * frontmatter. Never touches title/summary/status/body/updatedAt directly —
  * the founder must accept the proposal for it to become real content.
@@ -169,6 +259,14 @@ export function proposeChange(
   input: ProposeChangeInput
 ): ContentItem {
   const { filePath, frontmatter, body } = readRaw(category, slug);
+
+  // Uma proposta pendente não pode ser sobrescrita por outra: o founder perderia
+  // silenciosamente a versão que ainda não revisou. Os agentes já checam isso
+  // antes de chamar, mas a garantia precisa estar aqui — é o ponto por onde toda
+  // proposta passa, inclusive as de agentes escritos por terceiros.
+  if (frontmatter.reviewStatus === "proposed") {
+    throw new ProposalPendingError(category, slug, frontmatter.proposedBy);
+  }
 
   const nextFrontmatter: Record<string, unknown> = {
     ...frontmatter,
@@ -212,6 +310,14 @@ export function acceptProposal(category: string, slug: string): ContentItem {
     nextFrontmatter.summary = frontmatter.proposedSummary;
   }
   nextFrontmatter.updatedAt = new Date().toISOString().slice(0, 10);
+
+  // Marca que o corpo deste item já não é mais o template inicial — os agentes
+  // usam isso para não re-atacar eternamente um item que eles mesmos escreveram
+  // e o founder aceitou (ver `pareceVazio` em scripts/agents/shared.ts).
+  if (typeof frontmatter.proposedBy === "string") {
+    nextFrontmatter.acceptedFrom = frontmatter.proposedBy;
+  }
+  nextFrontmatter.acceptedAt = new Date().toISOString();
 
   for (const field of PROPOSAL_FIELDS) {
     delete nextFrontmatter[field];

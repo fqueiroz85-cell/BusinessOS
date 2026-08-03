@@ -33,6 +33,19 @@ type OllamaChatResponse = {
 // assinatura com um modelo maior para isso.
 const CLAUDE_CLI_MODEL = process.env.CLAUDE_CLI_MODEL ?? "haiku";
 
+// Teto para não deixar a requisição pendurada se o CLI travar ou ficar
+// esperando input interativo que nunca vem.
+const CLAUDE_CLI_TIMEOUT_MS = 120_000;
+
+// No Windows o `claude` é um shim .cmd, o que obriga `shell: true` — e aí o
+// Node concatena os argumentos sem escape, fazendo uma string vazia sumir do
+// comando. `--tools ""` virava `--tools --model`, ou seja: `--tools` engolia o
+// `--model`, o modelo escolhido nunca era aplicado (rodava no modelo padrão,
+// gastando mais cota) e as ferramentas não eram desligadas. Aspas literais
+// sobrevivem à concatenação e chegam ao CLI como string vazia.
+const USA_SHELL = process.platform === "win32";
+const SEM_FERRAMENTAS = USA_SHELL ? '""' : "";
+
 type ClaudeCliResult = {
   is_error: boolean;
   subtype?: string;
@@ -53,6 +66,9 @@ async function generateBriefingWithClaudeCode(
   const userPrompt = `Item: "${itemTitle}"\n\n${qaText}\n\nEscreva um briefing curto (até 300 palavras) sintetizando essas respostas.`;
 
   return new Promise((resolve, reject) => {
+    // Como os argumentos passam pelo parser do cmd.exe (ver USA_SHELL acima),
+    // nenhum texto livre — prompt do sistema, respostas do founder — vai em
+    // argv: tudo segue por stdin, onde não há quoting para quebrar.
     const child = spawn(
       "claude",
       [
@@ -61,20 +77,40 @@ async function generateBriefingWithClaudeCode(
         "json",
         "--no-session-persistence",
         "--tools",
-        "",
+        SEM_FERRAMENTAS,
         "--model",
         CLAUDE_CLI_MODEL,
-        "--system-prompt",
-        SYSTEM_PROMPT,
       ],
       {
         cwd: os.tmpdir(),
-        shell: process.platform === "win32",
+        shell: USA_SHELL,
       }
     );
 
     let stdout = "";
     let stderr = "";
+    let settled = false;
+
+    function fail(message: string) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      child.kill();
+      reject(new Error(message));
+    }
+
+    function succeed(text: string) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(text);
+    }
+
+    const timer = setTimeout(() => {
+      fail(
+        `O Claude Code CLI não respondeu em ${Math.round(CLAUDE_CLI_TIMEOUT_MS / 1000)}s e foi interrompido. Tente novamente.`
+      );
+    }, CLAUDE_CLI_TIMEOUT_MS);
 
     child.stdout.on("data", (chunk) => {
       stdout += chunk;
@@ -84,19 +120,26 @@ async function generateBriefingWithClaudeCode(
     });
 
     child.on("error", (err) => {
-      reject(
-        new Error(
-          `Não foi possível executar o Claude Code CLI ("claude"). Verifique se ele está instalado e logado (rode "claude auth status"). Detalhe: ${err.message}`
-        )
+      fail(
+        `Não foi possível executar o Claude Code CLI ("claude"). Verifique se ele está instalado e logado (rode "claude auth status"). Detalhe: ${err.message}`
+      );
+    });
+
+    // Sem este handler, um EPIPE ao escrever para um processo que já morreu
+    // vira exceção não capturada e derruba o processo Node inteiro — no dev
+    // do Next isso mata o worker de render e a rota passa a dar 500.
+    child.stdin.on("error", () => {
+      fail(
+        'Não foi possível enviar o prompt ao Claude Code CLI (o processo encerrou antes de recebê-lo). Rode "claude auth status" para verificar o login.'
       );
     });
 
     child.on("close", (code) => {
+      if (settled) return;
+
       if (code !== 0) {
-        reject(
-          new Error(
-            `Claude Code CLI encerrou com código ${code}. ${stderr.trim() || "Sem detalhes adicionais."}`
-          )
+        fail(
+          `Claude Code CLI encerrou com código ${code}. ${stderr.trim() || "Sem detalhes adicionais."}`
         );
         return;
       }
@@ -105,26 +148,21 @@ async function generateBriefingWithClaudeCode(
       try {
         payload = JSON.parse(stdout);
       } catch {
-        reject(
-          new Error("O Claude Code CLI retornou uma resposta que não é JSON válido.")
-        );
+        fail("O Claude Code CLI retornou uma resposta que não é JSON válido.");
         return;
       }
 
       if (payload.is_error || !payload.result) {
-        reject(
-          new Error(
-            `Claude Code CLI retornou um erro (${payload.subtype ?? "desconhecido"}).`
-          )
+        fail(
+          `Claude Code CLI retornou um erro (${payload.subtype ?? "desconhecido"}).`
         );
         return;
       }
 
-      resolve(payload.result.trim());
+      succeed(payload.result.trim());
     });
 
-    child.stdin.write(userPrompt);
-    child.stdin.end();
+    child.stdin.end(`${SYSTEM_PROMPT}\n\n---\n\n${userPrompt}`);
   });
 }
 
@@ -241,7 +279,12 @@ export async function POST(request: Request) {
 
   const updatedItem = saveBriefing(category, slug, briefingText);
 
+  // As três, como nas outras rotas de escrita: a listagem da categoria e a home
+  // são estáticas (ver saída do `next build`) e mostram resumo/status do item,
+  // então revalidar só a página de detalhe deixava as duas desatualizadas.
   revalidatePath(`/${category}/${slug}`);
+  revalidatePath(`/${category}`);
+  revalidatePath("/");
 
   return NextResponse.json({ success: true, item: updatedItem });
 }
