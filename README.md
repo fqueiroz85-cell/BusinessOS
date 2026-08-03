@@ -10,6 +10,23 @@ O conteúdo do negócio (objetivo, direção, validação e caixa) é salvo como
 - `components/` — sidebar, cards, editor de item e demais componentes de UI (shadcn/ui em `components/ui`).
 - `content/` — conteúdo do negócio em Markdown + frontmatter, organizado por categoria.
 - `lib/content.ts` — leitura/escrita dos arquivos de conteúdo (`getCategoryItems`, `getItem`, `saveItem`).
+- `scripts/agents/` — agentes de IA que leem o negócio e propõem conteúdo (ver abaixo).
+- `agents.config.json` — permissões de leitura/escrita declaradas por agente.
+
+## Agentes
+
+Quatro agentes leem o contexto do negócio via `GET /api/context`, decidem sozinhos em qual item agir e propõem conteúdo usando o Claude Code CLI. Nenhum deles escreve direto: toda proposta fica pendente de aceite ou rejeição na própria interface — **agentes propõem, o founder dispõe**.
+
+Com o servidor rodando (`npm run dev`), em outro terminal:
+
+```bash
+npm run agent:direcao     # constrói a cadeia Mercado → Problemas → ICP → Tese → Oferta
+npm run agent:validacao   # transforma as hipóteses de Direção em experimentos
+npm run agent:caixa       # estrutura fluxo de caixa e ERP contra o estilo de vida desejado
+npm run agent:auditor     # relatório de contradições entre as seções
+```
+
+Requer o [Claude Code](https://claude.com/claude-code) instalado e logado — as chamadas rodam sob a assinatura Claude, sem chave de API paga por token. Detalhes de arquitetura, permissões e contrato em `docs/agents-integration.md`.
 
 ## Como rodar
 
@@ -35,3 +52,4 @@ Contexto de produto e especificação técnica em:
 - `docs/briefing.md`
 - `docs/prd.md`
 - `docs/spec.md`
+- `docs/agents-integration.md`

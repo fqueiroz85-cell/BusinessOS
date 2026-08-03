@@ -1,0 +1,41 @@
+{
+  "comment": "Registro de permissoes por agente (Fase 3 de docs/agents-integration.md). Cada agente declara explicitamente o que pode ler e onde pode propor escrita. A validacao acontece no lado do BusinessOS (lib/agents.ts, chamado por POST /api/agent/write), nao confiando na boa conduta do agente externo. Escopos usam a notacao 'categoria/slug' ou 'categoria/*'.",
+  "agents": {
+    "agent:coach-direcao": {
+      "description": "Percorre a cadeia causal da Direcao (Mapa do Mercado -> Mapa de Problemas -> Perfil Ideal de Cliente -> Tese de Valor -> Oferta), identifica o elo mais fraco e propoe conteudo para ele usando os itens anteriores da cadeia como contexto.",
+      "reads": ["founder/*", "direcao/*"],
+      "writes": ["direcao/*"],
+      "writeFields": ["body", "summary"]
+    },
+    "agent:coach-validacao": {
+      "description": "Traduz as hipoteses de Direcao em experimentos concretos de validacao e organiza o aprendizado dos primeiros clientes. Nao propoe nada enquanto direcao/oferta estiver vazia — sem hipotese nao ha o que validar.",
+      "reads": ["direcao/*", "validacao/*"],
+      "writes": ["validacao/*"],
+      "writeFields": ["body", "summary"]
+    },
+    "agent:analista-caixa": {
+      "description": "Estrutura o Fluxo de Caixa e o ERP, cruzando com founder/estilo-de-vida para checar se o plano de caixa sustenta a renda alvo e o estilo de vida desejado.",
+      "reads": ["founder/*", "caixa/*"],
+      "writes": ["caixa/*"],
+      "writeFields": ["body", "summary"]
+    },
+    "agent:auditor-coerencia": {
+      "description": "Le o negocio inteiro e aponta contradicoes entre secoes (ex. direcao/oferta vs validacao/oferta, ICP vs primeiros clientes, premissas de caixa vs estilo de vida). Reporta as contradicoes no console e so pode propor atualizacao de 'summary' — nunca reescreve o corpo de nenhum item.",
+      "reads": ["founder/*", "direcao/*", "validacao/*", "caixa/*"],
+      "writes": ["founder/*", "direcao/*", "validacao/*", "caixa/*"],
+      "writeFields": ["summary"]
+    },
+    "skill:mapa-do-mercado": {
+      "description": "Skill de referencia da Fase 2 — propoe um esqueleto estruturado de Mapa do Mercado, sem chamar IA.",
+      "reads": ["direcao/*"],
+      "writes": ["direcao/mapa-do-mercado"],
+      "writeFields": ["body", "summary"]
+    },
+    "skill:tese-de-valor": {
+      "description": "Skill de referencia da Fase 2 — propoe um esqueleto de Tese de Valor lendo ICP e Mapa de Problemas como contexto cruzado, sem chamar IA.",
+      "reads": ["direcao/*"],
+      "writes": ["direcao/tese-de-valor"],
+      "writeFields": ["body", "summary"]
+    }
+  }
+}

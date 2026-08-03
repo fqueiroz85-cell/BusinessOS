@@ -453,7 +453,7 @@ Uma **skill**, neste contexto, é uma capacidade plugável — tipicamente um ag
 
 Cada skill deve declarar, no mínimo: quais `category`/`slug` pode ler, quais pode escrever, e se a escrita requer confirmação humana antes de sobrescrever o arquivo. Essa permissão granular por item é justamente o que o modelo `category/slug` (arquivo por item) viabiliza: não é preciso dar a uma skill acesso a todo o repositório de conteúdo para que ela seja útil em um domínio específico.
 
-A escrita programática de uma skill reaproveita a mesma rota `PUT /api/content/[categoria]/[slug]` usada pela UI — não há um caminho de escrita separado para agentes versus humanos, o que simplifica auditoria (todo `updatedAt` reflete a última escrita, seja ela humana ou de agente) e mantém consistência com `lib/content.ts` como fonte única da verdade para persistência.
+> **Nota (superado):** esta seção descrevia a intenção original de que skills reaproveitassem a mesma rota de escrita da UI. Isso foi revisto na Fase 2 da implementação. Hoje existem **dois caminhos de escrita distintos** — `POST /api/content` (humano, via UI) e `POST /api/agent/write` (agente, que grava uma proposta pendente em vez de sobrescrever o conteúdo) —, ambos apoiados na mesma função `saveItem`/`proposeChange` de `lib/content.ts`, que continua sendo a fonte única da verdade para persistência. Separar os caminhos é o que torna possível distinguir uma escrita humana de uma proposta de agente e exigir revisão explícita antes de qualquer mudança feita por IA. Ver `docs/agents-integration.md` (seções 3 e 5) para o desenho atual, e a seção 11 do mesmo documento para o sistema de permissões por agente.
 
 ---
 

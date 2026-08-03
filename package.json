@@ -10,7 +10,11 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "skill:mapa-do-mercado": "tsx scripts/skills/mapa-do-mercado.ts",
-    "skill:tese-de-valor": "tsx scripts/skills/tese-de-valor.ts"
+    "skill:tese-de-valor": "tsx scripts/skills/tese-de-valor.ts",
+    "agent:direcao": "tsx scripts/agents/coach-direcao.ts",
+    "agent:validacao": "tsx scripts/agents/coach-validacao.ts",
+    "agent:caixa": "tsx scripts/agents/analista-caixa.ts",
+    "agent:auditor": "tsx scripts/agents/auditor-coerencia.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

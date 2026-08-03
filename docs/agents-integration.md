@@ -1,6 +1,6 @@
 # Integração com Agentes de IA e Skills — Arquitetura
 
-**Status:** proposta de arquitetura + fase 1 e fase 2 implementadas.
+**Status:** fases 1, 2 e 3 implementadas.
 **Relacionado:** `docs/briefing.md` (visão de produto), `docs/prd.md` (fora de escopo v1), `docs/spec.md` (seção 11 — Integração Futura: Agentes de IA e Skills).
 
 Este documento detalha, em nível de implementação, como agentes de IA externos ao BusinessOS vão ler e (no futuro) escrever no contexto de negócio armazenado em `content/`. Ele assume o modelo de dados já existente: cada item é um arquivo `.md` com frontmatter YAML, acessado via `lib/content.ts` (`getCategoryItems`, `getItem`, `saveItem`), agrupado em 4 categorias fixas (`founder`, `direcao`, `validacao`, `caixa`).
@@ -22,7 +22,14 @@ Essa separação importa porque:
 2. **Permissões são naturalmente escopadas por skill**, não por agente inteiro — uma skill declara exatamente quais `category`/`slug` ela lê e escreve (ver seção 4), o que é mais seguro do que dar a um agente acesso irrestrito a todo `content/`.
 3. **O contrato entre skill e sistema é pequeno e estável** (seção 4), enquanto a lógica de um agente (que skills chamar, em que ordem, com que prompt) pode evoluir livremente sem alterar a superfície de API do BusinessOS.
 
-Nenhum agente ou skill roda dentro do processo do BusinessOS nesta fase — eles são processos externos (scripts, outros agentes de IA, notebooks) que consomem a API HTTP do app. O BusinessOS não hospeda nem executa modelos de IA; ele expõe leitura/escrita estruturada do contexto de negócio.
+Agentes e skills rodam como **processos externos** (scripts em `scripts/agents/` e `scripts/skills/`, ou qualquer outro agente de IA) que consomem a API HTTP do app — nunca importam `lib/content.ts` nem escrevem no disco diretamente. Essa é a fronteira que importa: o BusinessOS é dono do conteúdo e das permissões; o agente é dono do raciocínio.
+
+O BusinessOS não *hospeda* modelos de IA (não há pesos, nem servidor de inferência, nem chave de API cobrada por token no projeto), mas ele *invoca* um modelo em dois pontos, sempre delegando para um processo externo:
+
+- `app/api/briefing/route.ts` — gera o briefing de um item a partir das respostas do wizard, chamando o Claude Code CLI (`claude -p`) via `spawn`. É a única invocação de modelo que parte de dentro do processo Next.js, e existe porque o briefing é acionado por um botão na UI.
+- `scripts/agents/*.ts` — os agentes da Fase 3, que rodam fora do app e chamam o mesmo CLI.
+
+Em ambos os casos o modelo roda sob a **assinatura Claude já logada** (Free/Pro/Max), não sob uma chave de API paga por token — ver `.env.example`. Ollama continua disponível como provedor alternativo do briefing (`BRIEFING_PROVIDER=ollama`), 100% local e sem consumir cota da assinatura, ao custo de qualidade e velocidade.
 
 ---
 
@@ -221,12 +228,13 @@ Conforme `docs/spec.md` (seção 10), a camada `lib/content.ts` é o único pont
 - Implementar as primeiras 1–2 skills de referência (ex. "Mapa do Mercado" e "Tese de Valor", citadas em `docs/spec.md` seção 11.2) seguindo o contrato da seção 4, para validar o fluxo ponta a ponta antes de generalizar para mais skills.
 - Nenhum agente ainda decide sozinho quando agir — a invocação de uma skill nesta fase é sempre iniciada manualmente por Felipe (ex. um comando/script que ele executa), não um processo autônomo rodando em background.
 
-### Fase 3 — Agentes autônomos com permissões granulares
+### Fase 3 — Agentes com permissões granulares (implementada nesta mudança)
 
-- Agentes passam a rodar de forma autônoma/agendada (não apenas sob comando manual de Felipe), monitorando `/api/context` periodicamente e decidindo por conta própria quando uma skill deveria propor uma atualização (ex. "faz 30 dias que `validacao/primeiros-clientes.md` não muda e há itens novos em `caixa/` — vale revisitar").
-- Sistema de permissões granular por agente/skill: um registro explícito (ex. `agents.config.json` ou equivalente) declarando, por agente, quais `category`/`slug` ele pode ler e propor escrita, evitando que qualquer agente conectado tenha acesso irrestrito a todo o negócio.
-- Possível introdução de autenticação/tokens de API por agente (quem está fazendo a chamada), especialmente relevante se o BusinessOS já tiver migrado para Supabase (seção 6) e estiver acessível fora do ambiente local.
-- Revisão humana continua obrigatória para qualquer escrita que altere `body` de forma substancial; agentes autônomos podem, no máximo, ganhar permissão para mudanças de baixo risco sem revisão prévia (ex. atualizar apenas `summary`), a definir com base em uso real da fase 2.
+- **Quatro agentes** em `scripts/agents/`, cada um dono de um domínio do negócio, todos usando o Claude Code CLI como motor de raciocínio (seção 10).
+- **Permissões granulares** por agente em `agents.config.json`, validadas server-side em `POST /api/agent/write` (seção 11).
+- **Decisão própria sobre o alvo**: diferente das skills da Fase 2 — que recebem `category`/`slug` fixos no código —, cada agente lê `/api/context` e *decide sozinho* em qual item agir. É essa decisão que o torna um agente e não uma skill (seção 1).
+- **Ainda sob comando manual** (`npm run agent:*`). Execução agendada/autônoma continua fora de escopo: o passo que falta é um scheduler, não uma mudança de arquitetura — os agentes já decidem sozinhos *o que* fazer, só não decidem *quando* rodar.
+- **Sem autenticação nas rotas**, consistente com o resto da v1 (uso local). Tokens de API por agente continuam pendentes e passam a ser obrigatórios se o app for exposto publicamente (seção 6).
 
 ---
 
@@ -250,4 +258,63 @@ Conforme `docs/spec.md` (seção 10), a camada `lib/content.ts` é o único pont
   - `scripts/skills/tese-de-valor.ts` (`agent: "skill:tese-de-valor"`) — propõe um esqueleto de Tese de Valor ("Hipótese central", "Por que este cliente pagaria", "Evidência hoje", "Riscos da hipótese"), lendo também `direcao/perfil-ideal-de-cliente` e `direcao/mapa-de-problemas` como `relatedContext` (seção 4) para incluir avisos no `rationale` quando esses itens ainda parecem não preenchidos (heurística simples: corpo com menos de 200 caracteres). Executar com `npm run skill:tese-de-valor`.
   - Ambos os scripts dependem do servidor Next.js rodando em `http://localhost:3000` (configurável via `BUSINESSOS_URL`) para funcionar ponta a ponta; sem o servidor no ar, falham de forma controlada ao chamar `fetch`.
 - `tsx` foi adicionado como devDependency (`package.json`) para permitir rodar os scripts `.ts` diretamente via `npm run skill:*`, sem passo de build separado.
-- **Fase 3 (agentes autônomos, permissões granulares por agente/skill, autenticação) continua não implementada** — a invocação das skills desta fase é sempre manual (Felipe rodando `npm run skill:*`), não há orquestração autônoma, nem sistema de permissões por agente/skill (qualquer `agent` pode propor mudança em qualquer `category`/`slug` existente — `proposeChange` só valida que o item existe, não que o chamador tem permissão sobre ele), nem autenticação nas rotas.
+- Na Fase 2 não havia sistema de permissões: qualquer `agent` podia propor mudança em qualquer `category`/`slug` existente, porque `proposeChange` só validava que o item existe, não que o chamador tem permissão sobre ele. Isso foi resolvido na Fase 3 (seção 11).
+
+---
+
+## 10. Claude Code como motor de raciocínio dos agentes
+
+Os agentes da Fase 3 não implementam raciocínio próprio: eles montam o contexto, chamam o **Claude Code CLI** (`claude -p`) e traduzem a resposta em uma proposta. O helper `runClaude` em `scripts/agents/shared.ts` concentra essa chamada.
+
+Por que o CLI, e não a API da Anthropic:
+
+- Roda sob a **assinatura Claude já logada** (Free/Pro/Max) — consome cota da assinatura, não uma chave de API cobrada por token.
+- É o mesmo mecanismo que `app/api/briefing/route.ts` já usava, então não há um segundo caminho de integração com IA no projeto.
+
+Decisões de implementação que não são óbvias:
+
+- **`--tools ""`** desliga todas as ferramentas do CLI. O agente raciocina sobre o contexto que recebe e devolve texto; ele não lê nem escreve arquivos por conta própria. Toda escrita passa por `POST /api/agent/write`, que valida permissões — se o agente pudesse editar arquivos direto, o modelo de permissões da seção 11 seria decorativo.
+- **`cwd: os.tmpdir()`** evita que o `AGENTS.md`/`CLAUDE.md` do repositório entre no prompt, o que contaminaria o raciocínio de negócio com instruções de desenvolvimento do próprio BusinessOS.
+- **`--system-prompt-file`, não `--system-prompt`**: no Windows o `claude` é um shim `.cmd`, o que obriga `shell: true` no `spawn`, e aí os argumentos são concatenados sem escape. Um system prompt de várias linhas com aspas e parênteses quebraria o comando. O prompt vai por arquivo temporário (removido no `finally`) e o user prompt vai por stdin.
+- **Modelo padrão Opus** (`AGENT_CLI_MODEL`), diferente do briefing, que usa Haiku. O briefing é síntese curta de respostas que o founder acabou de dar, acionada por um botão; um agente raciocina sobre o negócio inteiro e roda poucas vezes por semana. São perfis de custo/qualidade opostos.
+- **Saída em JSON** seguindo o `SkillOutput` da seção 4. `runClaudeForProposal` faz o parse e **falha explicitamente** se vier fora do contrato — melhor abortar do que gravar uma proposta malformada no frontmatter de um item.
+
+## 11. Permissões por agente (`agents.config.json`)
+
+Cada agente declara, em `agents.config.json`, o que pode ler e onde pode propor escrita:
+
+```jsonc
+"agent:coach-direcao": {
+  "description": "...",
+  "reads": ["founder/*", "direcao/*"],
+  "writes": ["direcao/*"],
+  "writeFields": ["body", "summary"]
+}
+```
+
+Escopos usam a notação `categoria/slug` (item específico) ou `categoria/*` (categoria inteira). Não existe curinga global: um agente sempre lista as categorias que toca, mesmo que sejam todas as quatro.
+
+**A validação roda no lado do BusinessOS**, em `lib/agents.ts`, chamado por `POST /api/agent/write` antes de qualquer escrita — não nos scripts de agente. Essa distinção é o ponto inteiro do mecanismo: um agente externo mal-comportado, com um bug de prompt, ou escrito por outra pessoa não deve conseguir escrever fora do escopo declarado. A checagem **falha fechada**: agente ausente de `agents.config.json` não escreve em lugar nenhum, e a rota responde `403`.
+
+`writeFields` é a segunda dimensão, e é o que viabiliza a "mudança de baixo risco" antecipada na seção 5: `agent:auditor-coerencia` lê o negócio inteiro mas só pode propor `summary` — ele nunca reescreve o corpo de nenhum item, mesmo que o modelo tente. Isso é aplicado pela rota, não pela boa conduta do script.
+
+Revisão humana continua obrigatória para toda escrita de agente, inclusive as de `summary`: `agents.config.json` restringe *onde* um agente pode propor, não remove o passo de aceitar/rejeitar da seção 5.
+
+## 12. Os quatro agentes
+
+Todos rodam sob comando manual, dependem do servidor Next.js no ar (`BUSINESSOS_URL`, padrão `http://localhost:3000`), e param sem propor nada se já houver uma proposta pendente na sua categoria — para não enfileirar propostas em cima de propostas.
+
+| Agente | Comando | Lê | Propõe em |
+|---|---|---|---|
+| `agent:coach-direcao` | `npm run agent:direcao` | `founder/*`, `direcao/*` | `direcao/*` (body + summary) |
+| `agent:coach-validacao` | `npm run agent:validacao` | `direcao/*`, `validacao/*` | `validacao/*` (body + summary) |
+| `agent:analista-caixa` | `npm run agent:caixa` | `founder/*`, `caixa/*` | `caixa/*` (body + summary) |
+| `agent:auditor-coerencia` | `npm run agent:auditor` | tudo | apenas `summary`, em qualquer item |
+
+**`agent:coach-direcao`** trata a Direção como uma cadeia causal — Mapa do Mercado → Mapa de Problemas → Perfil Ideal de Cliente → Tese de Valor → Oferta — e ataca o primeiro elo ainda não preenchido, passando apenas os elos *anteriores* como contexto (os posteriores dependem deste item, não o contrário). Com a cadeia inteira preenchida, ele escolhe o item parado há mais tempo.
+
+**`agent:coach-validacao`** aplica um gate antes de agir: se `direcao/oferta` e `direcao/tese-de-valor` estiverem vazias, ele para e manda rodar o coach de Direção primeiro — sem hipótese formulada não há o que validar.
+
+**`agent:analista-caixa`** cruza `caixa/*` com `founder/estilo-de-vida` para checar se o plano de caixa sustenta a renda alvo declarada. Essa é a razão de ele ler `founder/*`: o achado mais importante de um caixa de founder solo costuma ser a distância entre o que o negócio caminha para pagar e o que a vida do founder custa.
+
+**`agent:auditor-coerencia`** é o único que lê o negócio inteiro de uma vez, e o único cujo produto principal não é conteúdo: ele imprime no console um relatório de contradições entre seções (ex. a oferta desenhada em Direção não é a que está sendo validada; o ICP descrito não é o cliente que apareceu em Primeiros Clientes). Só propõe atualização de `summary`, e apenas quando o resumo de um item divergiu do corpo. O corpo do negócio é do founder — o auditor aponta, ele decide.
