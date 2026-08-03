@@ -16,14 +16,16 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-1.5">
-        <h1 className="text-3xl font-semibold tracking-tight">BusinessOS</h1>
+      <div className="flex flex-col gap-2">
+        <h1 className="font-heading text-3xl font-bold tracking-tight">
+          BusinessOS
+        </h1>
         <p className="text-muted-foreground">
           Pra quem está começando do zero.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {sections.map((section) => (
           <Link key={section.key} href={`/${section.key}`} className="block">
             <Card className="h-full transition-colors hover:bg-muted/60">

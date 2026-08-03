@@ -23,9 +23,10 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-border bg-sidebar px-4 py-8">
-      <div className="px-3 pb-8">
-        <span className="text-lg font-semibold tracking-tight text-sidebar-foreground">
+    <aside className="sticky top-4 flex h-[calc(100vh-2rem)] w-64 shrink-0 flex-col rounded-3xl bg-sidebar px-4 py-6">
+      <div className="flex items-center gap-2 px-3 pb-8">
+        <span className="size-2.5 shrink-0 rounded-full bg-primary" />
+        <span className="font-heading text-lg font-bold tracking-tight text-sidebar-foreground">
           BusinessOS
         </span>
       </div>
@@ -37,7 +38,7 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "rounded-full px-4 py-2.5 text-sm font-medium transition-colors",
                 active
                   ? "bg-sidebar-primary text-sidebar-primary-foreground"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"

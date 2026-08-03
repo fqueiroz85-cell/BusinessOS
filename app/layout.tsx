@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { Sidebar } from "@/components/sidebar";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-heading",
   subsets: ["latin"],
 });
 
@@ -19,13 +24,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} h-full antialiased`}>
+    <html
+      lang="pt-BR"
+      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
+    >
       <body className="min-h-full bg-background text-foreground">
-        <div className="flex min-h-full">
+        <div className="flex min-h-full gap-4 p-4">
           <Sidebar />
-          <main className="flex-1 px-10 py-10 md:px-14 md:py-12">
-            {children}
-          </main>
+          <main className="flex-1 py-6 md:py-8">{children}</main>
         </div>
       </body>
     </html>

@@ -31,6 +31,32 @@ const emptyItem: ContentItem = {
   body: "",
 };
 
+// "objetivo" é um dos itens de Founder com perguntas estruturadas
+// configuradas em lib/questions.ts — usada para mostrar a seção de
+// Perguntas + Briefing (gerado por IA) dentro do ItemEditor.
+const founderItem: ContentItem = {
+  title: "Objetivo",
+  slug: "objetivo",
+  category: "founder",
+  order: 1,
+  summary: "Por que esse negócio existe e o que você quer alcançar com ele.",
+  status: "in_progress",
+  updatedAt: "2026-07-11",
+  body: "## Qual é o seu objetivo com esse negócio?\n\nAntes de qualquer estratégia, defina o \"porquê\".",
+  answers: {
+    "porque-agora":
+      "Porque identifiquei uma janela de oportunidade clara agora.",
+  },
+};
+
+// Sem nenhuma resposta ainda — ItemEditor entra no modo onboarding
+// (QuestionWizard, uma pergunta por vez) em vez da lista editável.
+const freshFounderItem: ContentItem = {
+  ...founderItem,
+  status: "not_started",
+  answers: {},
+};
+
 const meta: Meta<typeof ItemEditor> = {
   title: "BusinessOS/ItemEditor",
   component: ItemEditor,
@@ -66,6 +92,34 @@ export const Empty: Story = {
       appDirectory: true,
       navigation: {
         pathname: "/direcao/novo-item",
+      },
+    },
+  },
+};
+
+export const WithStructuredQuestions: Story = {
+  args: {
+    item: founderItem,
+  },
+  parameters: {
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/founder/objetivo",
+      },
+    },
+  },
+};
+
+export const OnboardingWizard: Story = {
+  args: {
+    item: freshFounderItem,
+  },
+  parameters: {
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/founder/objetivo",
       },
     },
   },

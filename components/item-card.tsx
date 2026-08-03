@@ -12,13 +12,14 @@ type ItemCardProps = {
 
 export function ItemCard({ item, variant = "grid" }: ItemCardProps) {
   const href = `/${item.category}/${item.slug}`;
+  const statusBadgeVariant = item.status === "done" ? "default" : "secondary";
 
   return (
     <Link href={href} className="block">
       <Card
         className={cn(
           "h-full transition-colors hover:bg-muted/60",
-          variant === "list" && "flex-row items-center gap-4"
+          variant === "list" && "flex-row items-center gap-5"
         )}
       >
         <CardHeader
@@ -32,13 +33,15 @@ export function ItemCard({ item, variant = "grid" }: ItemCardProps) {
               {item.reviewStatus === "proposed" ? (
                 <Badge variant="outline">Proposta pendente</Badge>
               ) : null}
-              <Badge variant="secondary">{STATUS_LABELS[item.status]}</Badge>
+              <Badge variant={statusBadgeVariant}>
+                {STATUS_LABELS[item.status]}
+              </Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent
           className={cn(
-            "flex flex-col gap-2",
+            "flex flex-col gap-2.5",
             variant === "list" && "flex-1 py-0"
           )}
         >

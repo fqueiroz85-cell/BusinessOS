@@ -1,4 +1,16 @@
 import type { Preview } from '@storybook/nextjs-vite'
+import { Inter, Space_Grotesk } from 'next/font/google'
+import '../app/globals.css'
+
+const inter = Inter({
+  variable: '--font-sans',
+  subsets: ['latin'],
+})
+
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-heading',
+  subsets: ['latin'],
+})
 
 const preview: Preview = {
   parameters: {
@@ -16,6 +28,13 @@ const preview: Preview = {
       test: 'todo'
     }
   },
+  decorators: [
+    (Story) => (
+      <div className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default preview;

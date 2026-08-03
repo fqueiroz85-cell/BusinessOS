@@ -20,11 +20,11 @@ export default async function ItemDetailPage({ params }: PageProps) {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <p className="text-sm text-muted-foreground">
           {meta?.label ?? category}
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-heading text-3xl font-bold tracking-tight">
           {item.title}
         </h1>
       </div>

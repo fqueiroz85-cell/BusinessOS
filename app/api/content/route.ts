@@ -10,6 +10,7 @@ type ContentPayload = {
   summary?: string;
   status?: ContentStatus;
   body?: string;
+  answers?: Record<string, string>;
 };
 
 export async function POST(request: Request) {
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { category, slug, title, summary, status, body } = payload;
+  const { category, slug, title, summary, status, body, answers } = payload;
 
   if (!category || !slug) {
     return NextResponse.json(
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
       summary,
       status,
       body,
+      answers,
       updatedAt: new Date().toISOString().slice(0, 10),
     });
   } catch (err) {

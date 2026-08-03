@@ -56,7 +56,7 @@ export function ProposalBanner({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border bg-muted/40 p-5">
+    <div className="flex flex-col gap-5 rounded-2xl border border-border/60 bg-muted/40 p-6">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant="outline">Proposta pendente</Badge>
         <span className="text-sm text-muted-foreground">
@@ -73,13 +73,13 @@ export function ProposalBanner({
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1">
               <p className="text-xs text-muted-foreground">Atual</p>
-              <p className="rounded-lg border bg-background p-2.5 text-sm">
+              <p className="rounded-xl border bg-background p-3 text-sm">
                 {currentSummary}
               </p>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-xs text-muted-foreground">Proposto</p>
-              <p className="rounded-lg border bg-background p-2.5 text-sm">
+              <p className="rounded-xl border bg-background p-3 text-sm">
                 {proposedSummary}
               </p>
             </div>
@@ -93,13 +93,13 @@ export function ProposalBanner({
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1">
               <p className="text-xs text-muted-foreground">Atual</p>
-              <pre className="max-h-64 overflow-auto rounded-lg border bg-background p-2.5 font-mono text-xs whitespace-pre-wrap">
+              <pre className="max-h-64 overflow-auto rounded-xl border bg-background p-3 font-mono text-xs whitespace-pre-wrap">
                 {currentBody}
               </pre>
             </div>
             <div className="flex flex-col gap-1">
               <p className="text-xs text-muted-foreground">Proposto</p>
-              <pre className="max-h-64 overflow-auto rounded-lg border bg-background p-2.5 font-mono text-xs whitespace-pre-wrap">
+              <pre className="max-h-64 overflow-auto rounded-xl border bg-background p-3 font-mono text-xs whitespace-pre-wrap">
                 {proposedBody}
               </pre>
             </div>

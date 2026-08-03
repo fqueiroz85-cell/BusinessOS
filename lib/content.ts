@@ -19,6 +19,9 @@ export type ContentItem = {
   proposedRationale?: string;
   proposedSummary?: string;
   proposedBody?: string;
+  answers?: Record<string, string>;
+  briefing?: string;
+  briefingGeneratedAt?: string;
 };
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
@@ -51,6 +54,9 @@ function readMarkdownFile(filePath: string): ContentItem {
     proposedRationale: data.proposedRationale,
     proposedSummary: data.proposedSummary,
     proposedBody: data.proposedBody,
+    answers: data.answers,
+    briefing: data.briefing,
+    briefingGeneratedAt: data.briefingGeneratedAt,
   };
 }
 
@@ -137,6 +143,7 @@ export function saveItem(
     summary: data.summary ?? existingFrontmatter.summary,
     status: data.status ?? existingFrontmatter.status,
     updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 10),
+    answers: data.answers ?? existingFrontmatter.answers,
   };
 
   const nextBody = data.body !== undefined ? data.body : existingBody;
@@ -230,6 +237,46 @@ export function rejectProposal(category: string, slug: string): ContentItem {
   for (const field of PROPOSAL_FIELDS) {
     delete nextFrontmatter[field];
   }
+
+  writeRaw(filePath, nextFrontmatter, body);
+
+  return readMarkdownFile(filePath);
+}
+
+/**
+ * Saves the founder's raw answers to an item's structured questions
+ * (see lib/questions.ts) without touching any other field.
+ */
+export function saveAnswers(
+  category: string,
+  slug: string,
+  answers: Record<string, string>
+): ContentItem {
+  const { filePath, frontmatter, body } = readRaw(category, slug);
+
+  const nextFrontmatter: Record<string, unknown> = { ...frontmatter, answers };
+
+  writeRaw(filePath, nextFrontmatter, body);
+
+  return readMarkdownFile(filePath);
+}
+
+/**
+ * Saves an AI-generated briefing synthesized from an item's answers.
+ * Kept separate from `body` so the founder's own notes are never overwritten.
+ */
+export function saveBriefing(
+  category: string,
+  slug: string,
+  briefing: string
+): ContentItem {
+  const { filePath, frontmatter, body } = readRaw(category, slug);
+
+  const nextFrontmatter: Record<string, unknown> = {
+    ...frontmatter,
+    briefing,
+    briefingGeneratedAt: new Date().toISOString(),
+  };
 
   writeRaw(filePath, nextFrontmatter, body);
 

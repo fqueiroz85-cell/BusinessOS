@@ -13,6 +13,13 @@ const meta: Meta<typeof Sidebar> = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="flex min-h-screen bg-background p-4">
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;
