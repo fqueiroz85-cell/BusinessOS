@@ -15,11 +15,14 @@ export {
 /**
  * Modelo usado pelos agentes no Claude Code CLI.
  *
- * Diferente do briefing (que usa Haiku por ser síntese curta e repetida — ver
- * app/api/briefing/route.ts), agentes fazem raciocínio estratégico sobre o
- * negócio inteiro e rodam poucas vezes por semana, então o padrão é Opus.
+ * Sonnet é o meio-termo escolhido: acima do Haiku do briefing (que é síntese
+ * curta e repetida — ver app/api/briefing/route.ts), abaixo do Opus. Cada
+ * agente manda o negócio inteiro no prompt, então uma rodada dos agentes de
+ * uma vez consome cota de forma perceptível; Sonnet corta bem esse custo sem
+ * perder muito neste tipo de tarefa. Suba para "opus" via AGENT_CLI_MODEL
+ * quando quiser o máximo de qualidade em um item específico.
  */
-const AGENT_CLI_MODEL = process.env.AGENT_CLI_MODEL ?? "opus";
+const AGENT_CLI_MODEL = process.env.AGENT_CLI_MODEL ?? "sonnet";
 
 /**
  * Saída de uma skill, conforme o contrato da seção 4 de
