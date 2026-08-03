@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...menos o template, que nao tem segredo e serve de referencia para
+# quem clona o repo. A negacao precisa vir depois do `.env*` para valer.
+!.env.example
 
 # vercel
 .vercel
