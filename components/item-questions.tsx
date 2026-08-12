@@ -27,9 +27,13 @@ export function ItemQuestions({
           <Textarea
             id={`question-${question.id}`}
             value={answers[question.id] ?? ""}
+            placeholder={question.placeholder}
             onChange={(e) => onChange(question.id, e.target.value)}
             className="min-h-24"
           />
+          {question.hint ? (
+            <p className="text-xs text-muted-foreground">{question.hint}</p>
+          ) : null}
         </div>
       ))}
     </div>

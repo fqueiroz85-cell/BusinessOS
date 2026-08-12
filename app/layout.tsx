@@ -29,10 +29,12 @@ export default function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground">
-        <div className="flex min-h-full gap-4 p-4">
-          <Sidebar />
-          <main className="flex-1 py-6 md:py-8">{children}</main>
-        </div>
+        <Sidebar />
+        {/* pl = largura da sidebar fixa (w-61). Ela sai do fluxo para ficar
+            colada nas bordas e ocupar a altura inteira, como no layout alvo. */}
+        <main className="min-h-full pl-61">
+          <div className="mx-auto max-w-5xl px-6 py-10 md:px-12">{children}</div>
+        </main>
       </body>
     </html>
   );

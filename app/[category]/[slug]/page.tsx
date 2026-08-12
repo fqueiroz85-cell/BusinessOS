@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import { ItemEditor } from "@/components/item-editor";
 import { ProposalBanner } from "@/components/proposal-banner";
 import { getItem } from "@/lib/content";
@@ -19,15 +21,14 @@ export default async function ItemDetailPage({ params }: PageProps) {
   const meta = getCategoryMeta(category);
 
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <p className="text-sm text-muted-foreground">
-          {meta?.label ?? category}
-        </p>
-        <h1 className="font-heading text-3xl font-bold tracking-tight">
-          {item.title}
-        </h1>
-      </div>
+    <div className="flex flex-col gap-6">
+      <Link
+        href={`/${category}`}
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ChevronLeft className="size-4" />
+        {meta?.label ?? category}
+      </Link>
       {item.reviewStatus === "proposed" ? (
         <ProposalBanner
           category={item.category}
