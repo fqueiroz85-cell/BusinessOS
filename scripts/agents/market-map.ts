@@ -24,6 +24,14 @@ rodarAgenteDeItem({
   // que tamanho de mercado faz sentido perseguir.
   contexto: (context) => [
     { titulo: "Sobre o founder", itens: context.categories.founder },
+    // O Caixa entra mesmo sendo a última seção da cadeia: a aritmética de
+    // mercado ("quanta verba de anúncio essa meta exige") só faz sentido contra
+    // o capital que existe. Sem isto, o agente re-deriva a verba necessária
+    // como se fosse um gargalo, mesmo quando o founder já decidiu como financiá-la.
+    {
+      titulo: "Capital e financiamento disponíveis (seção Caixa)",
+      itens: context.categories.caixa,
+    },
   ],
   instrucao: (alvo) =>
     `Escreva o conteúdo do item "${alvo.title}". Comece pelo recorte de mercado e deixe explícito o que é hipótese. Se o objetivo do founder pedir uma renda que este mercado não comporta, diga isso.`,

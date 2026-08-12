@@ -26,6 +26,10 @@ export type ContentItem = {
   // que `body` virou conteúdo real, e não mais o template do scaffold.
   acceptedFrom?: string;
   acceptedAt?: string;
+  // O questionário do item, devolvido por GET /api/context. Permite ao agente
+  // saber quantas perguntas existem — sem isso não dá para distinguir "uma
+  // resposta longa" de "questionário preenchido".
+  questions?: { id: string; label: string }[];
 };
 
 export type BusinessContext = {

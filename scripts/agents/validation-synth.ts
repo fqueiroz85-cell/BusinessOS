@@ -34,8 +34,14 @@ rodarAgenteDeItem({
 
     return null;
   },
-  contexto: (context) => [
+  contexto: (context, alvo) => [
     { titulo: "Hipóteses a validar (seção Direção)", itens: context.categories.direcao },
+    // O outro item da Validação: o que já foi testado condiciona o que faz
+    // sentido testar agora.
+    {
+      titulo: "Estado atual da Validação (outros itens desta seção)",
+      itens: context.categories.validacao.filter((i) => i.slug !== alvo.slug),
+    },
   ],
   instrucao: (alvo) =>
     `Escreva o conteúdo do item "${alvo.title}" da seção Validação, testando concretamente as hipóteses da Direção acima. Cada experimento precisa do critério que faria o founder mudar de ideia.`,

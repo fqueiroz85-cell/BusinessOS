@@ -11,6 +11,9 @@ type ContentPayload = {
   status?: ContentStatus;
   body?: string;
   answers?: Record<string, string>;
+  responsavel?: string;
+  tags?: string[];
+  order?: number;
 };
 
 export async function POST(request: Request) {
@@ -25,7 +28,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { category, slug, title, summary, status, body, answers } = payload;
+  const { category, slug, title, summary, status, body, answers, responsavel, tags, order } =
+    payload;
 
   if (!category || !slug) {
     return NextResponse.json(
@@ -41,6 +45,9 @@ export async function POST(request: Request) {
       status,
       body,
       answers,
+      responsavel,
+      tags,
+      order,
       updatedAt: new Date().toISOString().slice(0, 10),
     });
   } catch (err) {

@@ -16,8 +16,13 @@ type BriefingPayload = {
 // "ollama" mantém o modelo local original como alternativa.
 const BRIEFING_PROVIDER = process.env.BRIEFING_PROVIDER ?? "claude-code";
 
-const SYSTEM_PROMPT =
-  "Você é um consultor que ajuda founders solo brasileiros a transformar respostas soltas em um briefing claro e acionável, em português do Brasil. Seja direto, use subtítulos curtos, e não invente informação que não esteja nas respostas.";
+const SYSTEM_PROMPT = [
+  "Você é um consultor que ajuda founders solo brasileiros a transformar respostas soltas em um briefing claro e acionável, em português do Brasil. Seja direto e use subtítulos curtos.",
+  "REGRA MAIS IMPORTANTE: só existe no briefing o que estiver em 'RESPOSTA LITERAL DO FOUNDER'.",
+  "Os enunciados das perguntas contêm exemplos (normalmente entre parênteses, após 'ex:'). Esses exemplos são do questionário, NÃO são respostas do founder — nunca os atribua a ele.",
+  "Não invente prazos, metas, modelos de negócio (B2B/B2C), canais nem números que o founder não escreveu. Pergunta em branco vira uma lacuna explícita no briefing, não um palpite.",
+  "Você pode tirar conclusões a partir das respostas, mas marque-as como leitura sua — nunca como algo que o founder declarou.",
+].join(" ");
 
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "llama3.2:3b";
@@ -259,13 +264,24 @@ export async function POST(request: Request) {
   saveAnswers(category, slug, answers);
 
   const questions = getQuestions(category, slug);
+
+  // Vários enunciados trazem exemplos entre parênteses — "(ex: vendas por
+  // telefone, gestão de equipe grande...)". Sem separar pergunta de resposta de
+  // forma inequívoca, o modelo absorve esses exemplos e os devolve como se
+  // fossem declarações do founder. Aconteceu: um briefing listou como
+  // "restrições não negociáveis" exatamente os três exemplos do enunciado, que
+  // o founder nunca escreveu.
   const qaText = questions
-    .map(
-      (question) =>
-        `Pergunta: ${question.label}\nResposta: ${
-          answers[question.id]?.trim() || "(não respondida)"
-        }`
-    )
+    .map((question) => {
+      const resposta = answers[question.id]?.trim();
+
+      return [
+        `PERGUNTA DO QUESTIONÁRIO: ${question.label}`,
+        resposta
+          ? `RESPOSTA LITERAL DO FOUNDER: ${resposta}`
+          : "RESPOSTA LITERAL DO FOUNDER: (em branco — ele não respondeu esta pergunta)",
+      ].join("\n");
+    })
     .join("\n\n");
 
   let briefingText: string;

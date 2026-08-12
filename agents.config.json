@@ -8,8 +8,8 @@
       "writeFields": ["summary"]
     },
     "agent:market-map": {
-      "description": "Primeiro elo da Direcao. Descreve o mercado em que o founder vai competir, comecando pelo recorte, usando founder/* para saber que tamanho de mercado faz sentido perseguir.",
-      "reads": ["founder/*", "direcao/*"],
+      "description": "Primeiro elo da Direcao. Descreve o mercado em que o founder vai competir, comecando pelo recorte, usando founder/* para saber que tamanho de mercado faz sentido perseguir e caixa/* para nao tratar como gargalo uma verba que o founder ja decidiu como financiar.",
+      "reads": ["founder/*", "direcao/*", "caixa/*"],
       "writes": ["direcao/mapa-do-mercado"],
       "writeFields": ["body", "summary"]
     },

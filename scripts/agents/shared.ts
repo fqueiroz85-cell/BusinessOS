@@ -222,7 +222,8 @@ Regras para "proposedBody":
 - Não invente fatos sobre o negócio que não estejam no contexto fornecido. Onde faltar informação, escreva uma pergunta ou um placeholder explícito "[Preencher: ...]" em vez de inventar.
 - "confidence" deve ser "low" quando o contexto disponível for pobre.`;
 
-const LIMITE_CONTEUDO_VAZIO = 120;
+/** Abaixo disto a resposta é um "sim"/"não sei" — não conta como respondida. */
+const LIMITE_RESPOSTA_SUBSTANTIVA = 15;
 
 /**
  * Heurística: o founder ainda não preencheu este item de verdade.
@@ -239,13 +240,26 @@ export function pareceVazio(item: ContentItem | undefined): boolean {
   // Proposta de agente já aceita: o corpo é conteúdo real, não o template.
   if (item.acceptedFrom) return false;
 
-  const respostas = Object.values(item.answers ?? {})
-    .map((valor) => valor?.trim() ?? "")
-    .join(" ");
+  // Briefing só existe depois que o founder respondeu e pediu a síntese.
+  if (item.briefing?.trim()) return false;
 
-  const conteudoDoFounder = `${respostas} ${item.briefing?.trim() ?? ""}`.trim();
+  const respondidas = Object.values(item.answers ?? {}).filter(
+    (valor) => (valor?.trim().length ?? 0) >= LIMITE_RESPOSTA_SUBSTANTIVA
+  ).length;
 
-  return conteudoDoFounder.length < LIMITE_CONTEUDO_VAZIO;
+  const totalDePerguntas = item.questions?.length ?? 0;
+
+  // Sem o questionário no contexto (agente externo antigo, ou item sem
+  // perguntas), cai para uma regra frouxa: uma resposta só não faz um item.
+  if (totalDePerguntas === 0) return respondidas < 2;
+
+  // Metade do questionário. Medir o *volume* das respostas, como esta função
+  // fazia antes, deixava uma única resposta longa marcar o item inteiro como
+  // preenchido — foi assim que o agente de caixa pulou `fluxo-de-caixa` (1 de 5
+  // perguntas respondidas, mas com um texto de 450 caracteres) e foi escrever
+  // `erp`. O que importa é a cobertura do questionário, não quantos caracteres
+  // o founder digitou.
+  return respondidas < Math.ceil(totalDePerguntas / 2);
 }
 
 /**
@@ -262,13 +276,30 @@ export function formatarItem(item: ContentItem | undefined, rotulo: string): str
     return `### ${rotulo}\n(item não encontrado)\n`;
   }
 
+  // O enunciado da pergunta, quando o contexto o traz — `porque-agora` sozinho
+  // obriga o modelo a adivinhar o que foi perguntado.
+  const rotuloDaPergunta = new Map(
+    (item.questions ?? []).map((q) => [q.id, q.label])
+  );
+
   const respostas = Object.entries(item.answers ?? {})
     .filter(([, valor]) => valor?.trim())
-    .map(([pergunta, valor]) => `- **${pergunta}**: ${valor.trim()}`)
+    .map(
+      ([id, valor]) => `- **${rotuloDaPergunta.get(id) ?? id}**\n  ${valor.trim()}`
+    )
+    .join("\n");
+
+  // Perguntas ainda em branco são informação: dizem ao agente o que falta, em
+  // vez de deixá-lo supor que o founder não tinha mais nada a dizer.
+  const emBranco = (item.questions ?? [])
+    .filter((q) => !(item.answers?.[q.id]?.trim()))
+    .map((q) => `- ${q.label}`)
     .join("\n");
 
   const blocoRespostas = respostas
-    ? `RESPOSTAS DO FOUNDER (conteúdo real, escrito por ele — priorize isto):\n${respostas}\n`
+    ? `RESPOSTAS DO FOUNDER (conteúdo real, escrito por ele — priorize isto):\n${respostas}\n${
+        emBranco ? `\nPERGUNTAS AINDA SEM RESPOSTA:\n${emBranco}\n` : ""
+      }`
     : "RESPOSTAS DO FOUNDER: (nenhuma ainda)\n";
 
   const blocoBriefing = item.briefing?.trim()

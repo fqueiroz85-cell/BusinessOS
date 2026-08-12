@@ -27,6 +27,12 @@ export type ContentItem = {
   // que o `body` deixou de ser o template inicial e passou a ter conteúdo real.
   acceptedFrom?: string;
   acceptedAt?: string;
+  /** Dono do item. Campo livre (e-mail ou nome) — vazio no uso solo. */
+  responsavel?: string;
+  /** Etiquetas livres, exibidas e editadas como lista separada por vírgula. */
+  tags?: string[];
+  /** Contador de gravações do item. Incrementado por `saveItem`, nunca pelo cliente. */
+  revisao?: number;
 };
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
@@ -108,6 +114,9 @@ function readMarkdownFile(filePath: string): ContentItem {
     briefingGeneratedAt: data.briefingGeneratedAt,
     acceptedFrom: data.acceptedFrom,
     acceptedAt: data.acceptedAt,
+    responsavel: data.responsavel,
+    tags: Array.isArray(data.tags) ? (data.tags as string[]) : undefined,
+    revisao: typeof data.revisao === "number" ? data.revisao : undefined,
   };
 }
 
@@ -198,6 +207,23 @@ export function saveItem(
   const { filePath, frontmatter: existingFrontmatter, body: existingBody } =
     readRaw(category, slug);
 
+  // `answers` é MESCLADO, não substituído — diferente do que era antes.
+  //
+  // O editor da UI guarda `answers` no estado do cliente, montado quando a
+  // página carregou, e reenvia o objeto inteiro a cada "Salvar". Uma aba aberta
+  // antes de outra escrita (um agente, outra aba, o wizard) reenviava o mapa
+  // antigo e apagava silenciosamente respostas que ela nunca chegou a ver —
+  // foi assim que a decisão de recorte gravada em direcao/mapa-do-mercado
+  // desapareceu. Mesclar também alinha `answers` com todos os outros campos
+  // daqui, que já eram atualização parcial ("usa o novo, senão mantém o atual").
+  //
+  // Consequência aceita: não dá para REMOVER uma resposta omitindo a chave. A UI
+  // limpa um campo enviando string vazia, que a mesclagem preserva.
+  const respostasExistentes =
+    existingFrontmatter.answers && typeof existingFrontmatter.answers === "object"
+      ? (existingFrontmatter.answers as Record<string, string>)
+      : undefined;
+
   const atualizacoes: Record<string, unknown> = {
     title: data.title ?? existingFrontmatter.title,
     slug: data.slug ?? existingFrontmatter.slug ?? slug,
@@ -206,7 +232,17 @@ export function saveItem(
     summary: data.summary ?? existingFrontmatter.summary,
     status: data.status ?? existingFrontmatter.status,
     updatedAt: data.updatedAt ?? new Date().toISOString().slice(0, 10),
-    answers: data.answers ?? existingFrontmatter.answers,
+    answers: data.answers
+      ? { ...respostasExistentes, ...data.answers }
+      : respostasExistentes,
+    responsavel: data.responsavel ?? existingFrontmatter.responsavel,
+    tags: data.tags ?? existingFrontmatter.tags,
+    // Contado aqui, e não recebido do cliente: é o número de vezes que o item
+    // foi gravado, e o cliente não tem como saber disso de forma confiável.
+    revisao:
+      (typeof existingFrontmatter.revisao === "number"
+        ? existingFrontmatter.revisao
+        : 0) + 1,
   };
 
   // `matter.stringify` serializa com js-yaml, que **lança** ao encontrar
@@ -311,6 +347,23 @@ export function acceptProposal(category: string, slug: string): ContentItem {
   }
   nextFrontmatter.updatedAt = new Date().toISOString().slice(0, 10);
 
+  // Aceitar um corpo escrito por agente tira o item de "não iniciado": ele
+  // deixou de ser o template do scaffold e passou a ter conteúdo real. Sem
+  // isto, um item com 11k de conteúdo aceito continuava exibindo o badge
+  // "não iniciado" no card até o founder corrigir na mão — e como o fluxo de
+  // todos os agentes termina em aceite, aconteceria nos 11 itens.
+  //
+  // Promove apenas `not_started` -> `in_progress`. Nunca rebaixa, e nunca
+  // mexe em `done`: decidir que algo está concluído é do founder, não de uma
+  // aceitação de proposta. Também só vale quando um corpo foi aceito — o
+  // summarizer propõe apenas `summary`, e aceitar um resumo não significa que
+  // o item tenha conteúdo.
+  const aceitouCorpo = typeof frontmatter.proposedBody === "string";
+
+  if (aceitouCorpo && nextFrontmatter.status === "not_started") {
+    nextFrontmatter.status = "in_progress";
+  }
+
   // Marca que o corpo deste item já não é mais o template inicial — os agentes
   // usam isso para não re-atacar eternamente um item que eles mesmos escreveram
   // e o founder aceitou (ver `pareceVazio` em scripts/agents/shared.ts).
@@ -352,6 +405,15 @@ export function rejectProposal(category: string, slug: string): ContentItem {
 /**
  * Saves the founder's raw answers to an item's structured questions
  * (see lib/questions.ts) without touching any other field.
+ *
+ * Como em `saveItem`, `answers` é MESCLADO e não substituído — e aqui a razão é
+ * ainda mais direta: quem chama é `POST /api/briefing`, acionado pelo botão
+ * "Gerar briefing com IA", que envia o mapa de respostas do estado do cliente,
+ * montado quando a página carregou. Gerar um briefing numa aba antiga gravava
+ * esse mapa por cima do arquivo e apagava respostas escritas depois em outro
+ * lugar. Corrigir só `saveItem` fechava o caminho do "Salvar" e deixava este
+ * aberto — com o agravante de que o briefing costuma ser a primeira coisa que
+ * se clica ao reabrir um item.
  */
 export function saveAnswers(
   category: string,
@@ -360,7 +422,15 @@ export function saveAnswers(
 ): ContentItem {
   const { filePath, frontmatter, body } = readRaw(category, slug);
 
-  const nextFrontmatter: Record<string, unknown> = { ...frontmatter, answers };
+  const respostasExistentes =
+    frontmatter.answers && typeof frontmatter.answers === "object"
+      ? (frontmatter.answers as Record<string, string>)
+      : undefined;
+
+  const nextFrontmatter: Record<string, unknown> = {
+    ...frontmatter,
+    answers: { ...respostasExistentes, ...answers },
+  };
 
   writeRaw(filePath, nextFrontmatter, body);
 

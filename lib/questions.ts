@@ -1,6 +1,10 @@
 export type Question = {
   id: string;
   label: string;
+  /** Texto de apoio sob o campo: explica o que uma boa resposta contém. */
+  hint?: string;
+  /** Exemplo dentro do campo vazio, quando ajuda mais que o `hint` sozinho. */
+  placeholder?: string;
 };
 
 const QUESTIONS: Record<string, Record<string, Question[]>> = {
@@ -254,6 +258,11 @@ const QUESTIONS: Record<string, Record<string, Question[]>> = {
   caixa: {
     "fluxo-de-caixa": [
       {
+        id: "capital-inicial",
+        label:
+          "Quanto capital você tem disponível para colocar no negócio (verba de anúncio, ferramentas, estoque) — separado da sua reserva pessoal?",
+      },
+      {
         id: "entradas-mes",
         label:
           "Qual foi o total de entradas (receita recebida) no último mês fechado?",
@@ -308,6 +317,107 @@ const QUESTIONS: Record<string, Record<string, Question[]>> = {
   },
 };
 
+/**
+ * Texto de apoio de cada pergunta, exibido sob o campo no editor.
+ *
+ * Fica separado de `QUESTIONS` de propósito: o `label` é a pergunta em si —
+ * conteúdo do produto — enquanto o `hint` é orientação de preenchimento, que
+ * muda com mais frequência e por outro motivo. Chave externa é `categoria/slug`
+ * porque ids se repetem entre itens (`porque-agora` existe em founder/objetivo
+ * e em direcao/tese-de-valor).
+ */
+const HINTS: Record<string, Record<string, string>> = {
+  "founder/objetivo": {
+    "porque-agora": "O que mudou — no mercado, na tecnologia ou na sua vida.",
+    "marco-3-anos": "Metas mensuráveis com prazo — não sensações.",
+    ocupacao: "Diga também em quantos meses espera essa virada.",
+    ambicao: "O tamanho da ambição — de projeto paralelo a mudar um setor inteiro.",
+    aprendizado: "A competência que fica com você mesmo se o negócio não vingar.",
+  },
+  "founder/estilo-de-vida": {
+    "renda-minima": "Dois números em reais: o piso de sobrevivência e o alvo.",
+    "horas-semana": "Hoje e daqui a um ano — a curva importa mais que o número.",
+    flexibilidade: "O que é inegociável na prática, não em princípio.",
+    evitar: "Limites que descartam modelos de negócio inteiros.",
+    "semana-ideal": "Dias, horários e ritmo — como a operação precisa caber.",
+  },
+  "direcao/mapa-do-mercado": {
+    "territorio-mercado":
+      "Ordem de grandeza basta. Diga de onde veio o número ou marque como hipótese.",
+    "concorrentes-diretos": "Nomes reais, com o que cada um faz bem e mal.",
+    "concorrentes-indiretos":
+      "Inclua o substituto informal: planilha, YouTube, IA grátis, não fazer nada.",
+    "dinamica-mercado": "O que mudou nos últimos 2 anos, e como você checa isso.",
+    "ponto-de-entrada": "O recorte específico — não o mercado inteiro.",
+  },
+  "direcao/mapa-de-problemas": {
+    "principais-problemas": "Em ordem de dor, não de quantidade de gente.",
+    "solucao-atual": "O que ela já gasta contornando indica disposição a pagar.",
+    "urgente-vs-latente": "Urgente é quem procura solução hoje. Latente ainda não sabe.",
+    "custo-do-problema": "Em dinheiro, tempo ou risco — o mais concreto possível.",
+    "evidencia-real": "Separe o que você observou do que você supôs.",
+  },
+  "direcao/perfil-ideal-de-cliente": {
+    "perfil-demografico": "Só o que for critério de decisão, não ficha cadastral.",
+    comportamento: "Prefira o observável ao psicológico — precisa dar para verificar.",
+    "sinais-de-alerta": "O anti-ICP: quem paga mas você não deveria atender agora.",
+    "onde-esta": "Onde ele já está hoje — é por ali que o anúncio chega.",
+    "clientes-perfeitos": "Se não tem clientes ainda, descreva quem você busca primeiro.",
+  },
+  "direcao/tese-de-valor": {
+    "hipotese-central": "Escreva de forma que dê para discordar.",
+    "porque-agora": "A janela: por que isso não era possível ou óbvio antes.",
+    "vantagem-injusta": "Se não houver nenhuma, diga isso — a tese muda de base.",
+    "crenca-contraria": "O que você vê que o mercado ainda não precificou.",
+    "sinal-de-erro": "O primeiro indício de que você errou, de preferência com número.",
+  },
+  "direcao/oferta": {
+    "escopo-oferta": "O que o cliente recebe, item a item.",
+    formato: "Compra única, assinatura, serviço — e por que cabe no seu tempo.",
+    preco: "Ancore no valor do problema e no que ele já gasta hoje.",
+    "promessa-central": "Uma frase: o resultado que o cliente compra.",
+    "fora-de-escopo": "Dizer o que não está incluso protege a entrega.",
+  },
+  "validacao/oferta": {
+    "pessoas-abordadas": "Quantas de verdade, e como você chegou nelas.",
+    "taxa-conversao": "Números, mesmo que pequenos e feios.",
+    objecoes: "A frase literal da pessoa vale mais que o resumo dela.",
+    "mudancas-na-oferta": "O que o mercado te obrigou a mudar.",
+    "pedidos-recorrentes": "O que pedem que você não vende — costuma ser o próximo produto.",
+  },
+  "validacao/primeiros-clientes": {
+    "clientes-conquistados": "Quem pagou, quanto e quando.",
+    "como-encontraram": "O canal que funcionou de fato, não o que você esperava.",
+    "padrao-comum": "Isso confirma ou contradiz o seu ICP?",
+    "clientes-perdidos": "O motivo real: preço, timing, confiança ou encaixe.",
+    "case-ou-depoimento": "Quem você mostraria para vender ao próximo.",
+  },
+  "caixa/fluxo-de-caixa": {
+    "capital-inicial": "Separado da sua reserva pessoal. Inclua limite de crédito, se usar.",
+    "entradas-mes": "Último mês fechado, recebido de fato.",
+    "saidas-mes": "Inclua taxas, impostos e o seu próprio pró-labore.",
+    "meses-de-reserva": "Ao ritmo atual de queima, não no melhor cenário.",
+    "entradas-saidas-previstas": "Próximos 90 dias: o que já está contratado.",
+    breakeven: "Quanto de receita cobre todos os custos do mês.",
+  },
+  "caixa/erp": {
+    "ferramentas-atuais": "Nota fiscal, cobrança, contratos — o que você usa hoje.",
+    "registro-financeiro": '"Nada formalizado" é uma resposta válida.',
+    "processo-doendo": "O que consome mais tempo ou gera mais erro.",
+    contabilidade: "Quem cuida, quanto custa e o que ainda sobra para você.",
+    "prioridade-automatizar": "Uma só — a que traria mais alívio agora.",
+  },
+};
+
 export function getQuestions(category: string, slug: string): Question[] {
-  return QUESTIONS[category]?.[slug] ?? [];
+  const perguntas = QUESTIONS[category]?.[slug] ?? [];
+  const hints = HINTS[`${category}/${slug}`];
+
+  if (!hints) return perguntas;
+
+  return perguntas.map((pergunta) =>
+    pergunta.hint || !hints[pergunta.id]
+      ? pergunta
+      : { ...pergunta, hint: hints[pergunta.id] }
+  );
 }

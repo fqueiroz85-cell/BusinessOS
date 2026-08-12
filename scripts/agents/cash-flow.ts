@@ -20,7 +20,7 @@ rodarAgenteDeItem({
   // Fluxo de caixa antes de ERP: a ferramenta serve ao raciocínio, não o contrário.
   alvos: ["fluxo-de-caixa", "erp"],
   systemPrompt: SYSTEM_PROMPT,
-  contexto: (context) => [
+  contexto: (context, alvo) => [
     // Founder entra porque o achado mais importante de um caixa de founder solo
     // costuma ser a distância entre o que o negócio paga e o que a vida custa.
     {
@@ -30,6 +30,13 @@ rodarAgenteDeItem({
     {
       titulo: "A oferta que gera as entradas (seção Direção)",
       itens: context.categories.direcao.filter((i) => i.slug === "oferta"),
+    },
+    // O outro item do Caixa. Sem isto, o agente escreve `erp` sem enxergar o
+    // capital declarado em `fluxo-de-caixa` — e conclui que não sabe com quanto
+    // dinheiro o negócio conta, mesmo o founder já tendo respondido.
+    {
+      titulo: "Estado atual do Caixa (outros itens desta seção)",
+      itens: context.categories.caixa.filter((i) => i.slug !== alvo.slug),
     },
   ],
   instrucao: (alvo) =>
