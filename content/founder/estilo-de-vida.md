@@ -3,9 +3,11 @@ title: Estilo de Vida
 slug: estilo-de-vida
 category: founder
 order: 2
-summary: 'A vida que o negócio precisa te dar — renda, tempo e liberdade.'
+summary: >-
+  Renda de R$15k a R$30k/mês, saindo de 2h/dia para 8h/dia em 1 ano, com
+  flexibilidade de horário e sem vendas locais
 status: not_started
-updatedAt: '2026-08-03'
+updatedAt: '2026-08-12'
 answers:
   renda-minima: |
     15000 reais e renda ideal seria 30 mil reais
@@ -16,16 +18,63 @@ answers:
   evitar: vendas de maneira local.
   semana-ideal: |
     5dias na semana 8 horas intensas, e com flexibilidade de horário
-reviewStatus: proposed
-proposedBy: 'agent:summarizer'
-proposedAt: '2026-08-03T16:26:35.857Z'
-proposedRationale: >-
-  Resumo desatualizado: O resumo atual é genérico (fala do que o item pergunta),
-  enquanto o founder já preencheu números e limites concretos de renda, tempo e
-  restrições que definem a conclusão do item.
-proposedSummary: >-
-  Renda de R$15k a R$30k/mês, saindo de 2h/dia para 8h/dia em 1 ano, com
-  flexibilidade de horário e sem vendas locais
+acceptedFrom: 'agent:summarizer'
+acceptedAt: '2026-08-03T16:51:19.043Z'
+briefing: >-
+  # Briefing — Estilo de Vida
+
+
+  ## Renda
+
+  **Mínima:** R$ 15 mil/mês (para viver com tranquilidade)  
+
+  **Ideal:** R$ 30 mil/mês
+
+
+  ## Tempo disponível
+
+  - **Hoje:** 2 horas/dia
+
+  - **Daqui a 1 ano:** 8 horas/dia  
+
+  *Leitura minha: forte intensão de escalar o tempo dedicado conforme o negócio
+  avança*
+
+
+  ## Flexibilidade (inegociável)
+
+  Horário flexível — precisa dessa liberdade
+
+
+  ## O que evitar
+
+  Vendas de maneira local
+
+
+  ## Semana ideal
+
+  - **Formato:** 5 dias na semana, 8 horas intensas
+
+  - **Requisito:** com flexibilidade de horário  
+
+  *Leitura minha: quer estrutura e ritmo previsível, mas não rigidez de
+  quando/onde trabalha*
+
+
+  ---
+
+
+  ### Atenção
+
+  **Há uma tensão aparente aqui:** o founder quer "flexibilidade de horário"
+  como inegociável, mas também visualiza "8 horas intensas em 5 dias" (estrutura
+  clara). Provavelmente significa: "não quero estar disponível 24/7 ou variar
+  demais quando começa/termina, mas preciso poder reorganizar as 8h conforme
+  necessário" — recomendo esclarecer isso na próxima conversa.
+briefingGeneratedAt: '2026-08-12T02:51:34.971Z'
+responsavel: ''
+tags: []
+revisao: 1
 ---
 ## Que estilo de vida esse negócio precisa sustentar?
 

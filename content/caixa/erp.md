@@ -1,13 +1,14 @@
 ---
-title: "ERP"
-slug: "erp"
-category: "caixa"
+title: ERP
+slug: erp
+category: caixa
 order: 2
-summary: "As ferramentas e sistemas que sustentam a operação financeira e administrativa."
-status: "not_started"
-updatedAt: "2026-07-11"
+summary: >-
+  As ferramentas e sistemas que sustentam a operação financeira e
+  administrativa.
+status: not_started
+updatedAt: '2026-07-11'
 ---
-
 ## Quais sistemas você usa para operar o negócio hoje?
 
 ### Perguntas para refletir

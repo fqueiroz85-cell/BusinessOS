@@ -4,215 +4,304 @@ slug: mapa-do-mercado
 category: direcao
 order: 1
 summary: >-
-  Recorte ainda em aberto entre produto low ticket, serviço de tráfego e
-  automações com IA — com a aritmética que mostra que R$ 15k/mês exige ~420
-  compradores e esteira de upsell, não só front-end.
-status: not_started
-updatedAt: '2026-08-03'
+  Recorte definido: produto digital de baixo ticket para concurseiros militares,
+  atacando a dor do TAF, com front-end único e upsell segmentado por força —
+  validação do front-end vem antes da esteira, mas a meta de R$15k/mês só fecha
+  com a esteira completa.
+status: in_progress
+updatedAt: '2026-08-04'
 acceptedFrom: 'agent:market-map'
-acceptedAt: '2026-08-03T16:08:51.000Z'
-answers: {}
+acceptedAt: '2026-08-04T01:53:11.144Z'
+answers:
+  ponto-de-entrada: >-
+    Recorte A: produto digital próprio de baixo ticket. Nicho: concurseiros da
+    área militar. Dor específica atacada: aprovação no TAF (Teste de Aptidão
+    Física).
+
+
+    Arquitetura do produto: o front-end de baixo ticket resolve a INTRODUÇÃO ao
+    treinamento — como começar, o que fazer nas primeiras semanas — e por isso
+    independe da força. O direcionamento específico por força (Exército,
+    Marinha, Aeronáutica, PM estadual, Bombeiros), que é onde o padrão do TAF
+    muda, fica no upsell. Isso mantém um único produto e um único criativo no
+    topo do funil, e faz o próprio cliente se auto-segmentar na hora da compra.
+
+
+    Sequência decidida: validar primeiro o produto de front-end. Só construir a
+    esteira/backend depois que a conversão do front-end estiver comprovada.
+
+
+    Dimensões que também segmentam o TAF, além da força: sexo e faixa etária (em
+    vários editais a mulher faz barra isométrica em vez de dinâmica) e prazo até
+    a prova.
+  dinamica-mercado: >-
+    PESQUISA DESK (agosto/2026) — calendário de editais e a janela de compra que
+    ele cria.
+
+
+    DATAS CONFIRMADAS DAS PROVAS OBJETIVAS (Forças Armadas, ciclo 2026):
+
+    - ESA (1.100 vagas): prova em 26/jul/2026
+
+    - Colégio Naval: 1 e 2/ago/2026
+
+    - Escola Naval: 29 e 30/ago/2026
+
+    - EsPCEx (440 vagas): 12 e 13/set/2026
+
+    - IME (100 vagas): 20/set/2026
+
+    - ITA: 1a fase 27/set, 2a fase 20 a 23/out/2026
+
+    - Bombeiros AL (344 vagas): 11/out/2026
+
+    - EEAR 2027.2 e Bombeiros MA (PAES): 22/nov/2026
+
+    - PM-SP soldado: edital publicado em 2026, 2.000 vagas, salário R$ 5,4 mil
+
+    - Nordeste: mais de 13.000 vagas em PM, Polícia Penal e Bombeiros (AL, BA,
+    CE, MA, PB, PE, PI, RN)
+
+
+    INFERÊNCIA CENTRAL — A JANELA DE COMPRA NÃO É A DATA DA PROVA OBJETIVA, É O
+    QUE VEM DEPOIS DELA.
+
+    Meu comprador é quem JÁ passou na teórica. Logo, a demanda por preparo para
+    o TAF não acende quando sai o edital nem no dia da prova objetiva: acende no
+    RESULTADO da objetiva, quando a pessoa descobre que passou e que o próximo
+    teste é físico e eliminatório. A janela fica algumas semanas ATRÁS de cada
+    data acima.
+
+
+    CONSEQUÊNCIA OPERACIONAL: as provas objetivas se concentram entre julho e
+    novembro de 2026, o que coloca a temporada de TAF de agosto de 2026 até o
+    início de 2027. A janela está ABRINDO AGORA — a prova da ESA já aconteceu em
+    26/jul. Isso define quando gastar o limite do cartão: concentrar verba logo
+    após cada divulgação de resultado, não de forma constante o ano inteiro.
+
+
+    [Preencher: para cada força-alvo, a data de DIVULGAÇÃO DO RESULTADO da
+    objetiva e a data do TAF — são esses dois marcos, e não a data da prova, que
+    definem o início e o fim de cada janela de anúncio.]
 briefing: >-
-  ## Briefing: Mapa do Mercado
+  # Briefing: Mapa do Mercado
 
-
-  **Status:** Incompleto — informações insuficientes
-
-
-  Não há dados respondidos nesta seção. Sem essas informações, não é possível
-  estruturar um briefing sobre o mercado.
+  **Status: Incompleto – Informações Críticas Faltando**
 
 
   ---
 
 
-  ## O que está faltando (prioridade)
+  ## O Problema
 
 
-  **Crítico para começar:**
-
-  - **TAM/SAM/SOM** — Qual o tamanho real do mercado que você está mirando?
-  (Pode ser estimativa grosseira)
-
-  - **Concorrentes diretos** — Quem já resolve esse problema? Como cobram?
-
-  - **Seu ponto de entrada** — Qual nicho, segmento de preço ou geografia você
-  vai atacar primeiro?
-
-
-  **Importante para validar:**
-
-  - **Alternativas indiretas** — O cliente está usando planilha, não fazer nada,
-  ou soluções "caseiras"? Isso é seu maior concorrente
-
-  - **Dinâmica do mercado** — Está crescendo? Estável? O que mudou nos últimos
-  12 meses?
+  Você não respondeu nenhuma das perguntas essenciais sobre seu mercado. Sem
+  esses dados, é impossível validar se sua ideia tem perna para ficar ou se você
+  está perseguindo um problema que ninguém quer resolver.
 
 
   ---
 
 
-  ## Próximo passo
+  ## O Que Está Faltando (Priorize Nessa Ordem)
 
 
-  Responda essas 5 perguntas com o máximo de honestidade que conseguir:
+  **1. Concorrência (fácil de mapear)**
 
-  - Não precisa ser perfeito — uma estimativa grosseira é melhor que nada
+  - Liste 3-5 concorrentes diretos: o que eles cobram, quem usa, o que fazem
+  bem/mal
 
-  - Se não sabe, diga "não sei, mas acho que…" ou indique onde pesquisar
+  - Identifique alternativas indiretas: planilhas, ferramentas genéricas, ou
+  "não fazer nada"
 
-  - Números relativos funcionam ("meu concorrente A é 3x maior que B")
+
+  **2. Tamanho do mercado (grosseiro é ok)**
+
+  - TAM: mercado total possível (ex: "todos os freelancers no Brasil")
+
+  - SAM: segmento atacável por você (ex: "freelancers em design")
+
+  - SOM: quanto você consegue capturar em 3 anos
 
 
-  Depois disso, consigo montar um briefing que você possa usar para comunicar a
-  oportunidade.
-briefingGeneratedAt: '2026-08-03T16:09:05.125Z'
+  **3. Dinâmica do mercado**
+
+  - Está crescendo? Por quê? (regulação, tecnologia, mudança comportamental?)
+
+  - É estável ou contracionista?
+
+
+  **4. Sua estratégia de entrada**
+
+  - Qual é seu diferencial? (nicho específico, preço, geografia,
+  funcionalidade?)
+
+  - Por que os clientes escolheriam você em vez da alternativa?
+
+
+  ---
+
+
+  ## Próximo Passo
+
+
+  Volte e responda essas perguntas. Se não souber responder com dados reais,
+  pesquise:
+
+  - LinkedIn/Twitter: veja quem fala sobre o problema
+
+  - Ferramentas: Product Hunt, Crunchbase, relatórios de mercado
+
+  - Entrevistas: converse com 5-10 pessoas do seu público-alvo
+
+
+  Sem essas informações, você está navegando no escuro.
+briefingGeneratedAt: '2026-08-03T16:52:05.094Z'
 ---
 ## Mapa do Mercado
 
-> Status: **rascunho de trabalho**. Ainda não escolhi meu recorte de mercado, então este mapa tem duas funções: (1) deixar explícitas as três frentes possíveis que saem do meu objetivo e (2) montar a aritmética que qualquer uma delas precisa fechar para me dar R$ 15k líquidos/mês. Tudo marcado como **[Hipótese]** ainda não foi verificado por mim.
+> Status: **recorte definido, números ainda por validar**. Diferente da versão anterior deste mapa, aqui já não estou escolhendo entre A, B e C — escolhi **A: produto digital próprio de baixo ticket**, no nicho de **concurseiros da área militar**, atacando a dor específica do **TAF (Teste de Aptidão Física)**. O que falta agora não é decisão de rota, é validação de números. Tudo marcado como **[Hipótese]** ainda não foi verificado por mim.
 
 ---
 
-### 1. O recorte ainda não está feito — e ele vem antes de qualquer número
+### 1. O recorte — resolvido
 
-"Mercado digital" ou "infoproduto" não é mercado. Pelas minhas respostas de Objetivo e Estilo de Vida (renda extra virando principal, sem venda local, quero virar expert em low ticket, tráfego pago e automações com IA), sobram três recortes possíveis — e eles são **negócios diferentes**, com concorrentes, caixa e risco diferentes:
+| Dimensão | Definição |
+|---|---|
+| Modelo | Produto digital próprio, baixo ticket, vendido por tráfego pago |
+| Nicho | Concurseiros da área militar (Exército, Marinha, Aeronáutica, PM estadual, Bombeiros) |
+| Dor específica atacada | Aprovação no TAF — Teste de Aptidão Física |
+| Geografia | Brasil, 100% online (venda local está fora — decisão já travada no Estilo de Vida) |
+| Segmento de preço | Baixo ticket no front-end, com upsell (faixas ainda **[Preencher]**) |
 
-| # | Recorte candidato | O que eu vendo | Quem paga | Capital de giro |
-|---|---|---|---|---|
-| A | Produtos digitais de baixo ticket (R$ 27–97) com esteira de upsell, vendidos por tráfego pago no Brasil | Meu próprio produto | Consumidor final | **Alto** (verba de anúncio antes do lucro) |
-| B | Gestão de tráfego pago como serviço para infoprodutores/e-commerces | Meu tempo e minha operação | Outro empresário | **Baixo** |
-| C | Automações com IA (bots, esteiras, funis) para pequenos negócios | Implementação + mensalidade | Outro empresário | **Baixo** |
-
-**Minha leitura:** meu objetivo descreve **A** como destino ("expert em low ticket", "esteira de produto") e **B** como a habilidade que sustenta A. O caminho mais coerente com "primeiro renda extra, 2h/dia" pode ser começar por B (entra caixa rápido, aprendo tráfego com o dinheiro dos outros) e usar esse caixa para financiar A. Mas isso é **decisão minha, não do mercado** — preciso escolher antes de seguir para "Problemas" e "Cliente Ideal".
-
-**[Preencher: qual recorte eu escolho? A, B, C ou B→A?]**
-
-**[Preencher: se for A, em qual nicho? "Low ticket" é modelo de negócio, não nicho. Um produto de R$ 47 sobre emagrecimento, sobre concurso público ou sobre planilha de obra competem com gente completamente diferente.]**
+**Isso já responde a pergunta mais importante do mapa anterior:** "low ticket" não é nicho, é modelo. O nicho é concurso militar; o desejo comprado é passar no TAF, que costuma ser o maior filtro de reprovação em edital militar — é o obstáculo mais concreto e mais ansiogênico do processo, o que normalmente indica boa disposição a pagar por ajuda.
 
 ---
 
-### 2. Como o dinheiro circula nesse mercado (o que eu preciso entender antes de tamanho)
+### 2. Arquitetura do produto — e por que ela é uma decisão de mercado, não só de produto
 
-No recorte A, a cadeia é sempre a mesma:
+A decisão de desenho já tomada tem uma lógica de funil que vale registrar aqui, porque muda como eu vou medir concorrência e tamanho:
 
-**Verba de anúncio → clique → página de vendas/VSL → checkout (Pix ou cartão) → order bump → upsell → (às vezes) recorrência/comunidade.**
+- **Front-end único:** resolve a *introdução* ao treinamento — como começar, o que fazer nas primeiras semanas. Isso independe da força, então um único criativo e uma única página de vendas servem para todo o nicho. Isso reduz custo de teste de oferta (não preciso validar 5 públicos, só 1).
+- **Upsell segmentado por força:** Exército, Marinha, Aeronáutica, PM estadual, Bombeiros — é onde o padrão do TAF muda de verdade (tempos, provas, índices mínimos).
+- **Outras dimensões que também segmentam o TAF** e que precisarão entrar na esteira ou na oferta em algum ponto: **sexo** (em vários editais a mulher faz barra isométrica em vez de dinâmica) e **faixa etária** (índices variam por idade), além de **prazo até a prova** (quem tem 3 meses precisa de um produto diferente de quem tem 3 semanas).
+- O próprio cliente se auto-segmenta na hora da compra do upsell — eu não preciso adivinhar qual força ele está tentando.
+
+**Consequência para a leitura de mercado:** meu SAM não é "concurseiros militares" de forma genérica — é mais preciso pensar em camadas: quem está no funil de topo (qualquer concurseiro militar buscando começar a treinar) e quem converte no upsell (segmentado por força/sexo/idade/prazo). O tamanho do topo do funil pode ser grande; o tamanho de cada upsell é bem menor e mais específico.
+
+---
+
+### 3. Sequência decidida — e a tensão que ela cria com a meta de renda
+
+**Decisão:** validar primeiro o produto de front-end. Só construir a esteira/backend depois que a conversão do front-end estiver comprovada.
+
+Isso é prudente do ponto de vista de risco — não vale a pena construir 5 produtos de upsell (um por força) antes de saber se alguém compra o front-end. Mas preciso ser honesto comigo sobre o que isso significa em relação à aritmética da meta de renda (ver seção 5): **enquanto eu estiver só no front-end, este negócio não vai gerar R$ 15k/mês.** Ele vai gerar dado de conversão, CAC e prova de demanda. É a fase certa para side project de 2h/dia — só não posso confundir "validei o front-end" com "o negócio já sustenta a meta". A meta só fica alcançável quando a esteira (upsell por força) existir e estiver rodando.
+
+**[Preencher: qual é o critério numérico de "front-end validado"? Ex.: X vendas com CAC ≤ Y em Z dias de anúncio.]**
+
+---
+
+### 4. Como o dinheiro circula nesse mercado
+
+A cadeia é a mesma de qualquer produto low ticket vendido por tráfego pago:
+
+**Verba de anúncio → clique → página de vendas/VSL → checkout (Pix ou cartão) → order bump → upsell segmentado por força → (talvez) recorrência/acompanhamento.**
 
 Quem fica com o dinheiro no meio do caminho:
-- **Meta/Google**: a maior parte do faturamento bruto de um produto low ticket vai embora em mídia. No low ticket o front-end costuma rodar no empate ou no prejuízo — **o lucro nasce no order bump e no upsell**, não na venda de R$ 47.
-- **Plataforma de checkout** (Kiwify, Hotmart, Cakto, Eduzz, Braip e afins): taxa por transação. **[Hipótese: faixa de 5% a 10% + taxa fixa. Checar em uma tarde: página de preços de cada uma.]**
-- **Afiliados**, se eu abrir programa: comissão que pode passar de 50% em low ticket.
-- **Impostos e ferramentas** (domínio, e-mail, editor de página, IA, rastreamento).
+- **Meta Ads** (provavelmente a plataforma principal aqui, dado o público): a maior fatia do faturamento bruto vira mídia. O front-end tende a rodar no empate ou no prejuízo controlado — **o lucro nasce no upsell por força**, não na venda do front-end.
+- **Plataforma de checkout** (Kiwify, Hotmart, Cakto etc.): taxa por transação. **[Hipótese: 5% a 10% + taxa fixa. Checar em uma tarde: página de preços de cada uma.]**
+- **Impostos e ferramentas** (domínio, editor de página, IA, rastreamento).
 
-**Consequência prática:** este não é um mercado de "margem alta" como parece de fora. É um mercado de **margem sobre a esteira**. Se eu não tiver upsell, não existe negócio de R$ 15k/mês aqui.
-
----
-
-### 3. Tamanho: por que eu vou fazer de baixo para cima
-
-Não tenho fonte confiável na mão para cravar TAM em reais, e não vou inventar. O número top-down ("o mercado de educação online no Brasil movimenta X bilhões") não muda nenhuma decisão minha. O que muda é o número de baixo para cima: **quantas compras eu preciso por dia**.
-
-| Camada | Definição | Minha estimativa |
-|---|---|---|
-| TAM | Total gasto por brasileiros em produtos digitais de baixo ticket comprados por anúncio | **[Hipótese: bilhões de reais/ano. Checar em uma tarde: relatórios públicos da Hotmart e da Nuvemshop, e a Biblioteca de Anúncios do Meta para medir volume de anunciantes ativos no meu nicho.]** |
-| SAM | O nicho específico que eu escolher, no Brasil, comprando por Meta Ads | **[Preencher depois de escolher o nicho]** |
-| SOM (12 meses) | O que eu consigo capturar com 2h/dia agora e 8h/dia daqui a um ano | **~400 a 850 compradores/mês** (ver aritmética abaixo) |
-
-O SOM acima não é chute otimista: é **exatamente o que meu objetivo de renda exige**. Se esse número parecer grande demais para o nicho que eu escolher, o problema é o nicho — não a meta.
+**Consequência prática, já validada pela minha própria arquitetura:** eu cheguei sozinho à mesma conclusão do mapa anterior — front-end genérico não é o negócio, é a porta de entrada. O negócio é a esteira segmentada por força.
 
 ---
 
-### 4. A aritmética que meu objetivo exige (a parte desconfortável)
+### 5. A aritmética que meu objetivo exige
 
 Meta declarada: **R$ 15.000 líquidos/mês (mínimo)** e **R$ 30.000 (ideal)**.
 
-Cenário de referência para o recorte A — **todos os parâmetros são hipóteses minhas, a validar**:
+Cenário de referência — **todos os parâmetros abaixo são hipóteses minhas, ainda sem preço definido para este nicho**:
 
 | Variável | Hipótese | R$ 15k líq. | R$ 30k líq. |
 |---|---|---|---|
-| Ticket médio por comprador (front + bump + upsell) | R$ 120 | R$ 120 | R$ 120 |
-| Margem líquida sobre faturamento (após mídia, plataforma, imposto, ferramentas) | 30% | 30% | 30% |
+| Ticket médio por comprador (front + bump + upsell por força) | R$ 120 **[Preencher com preço real do front-end + upsell]** | R$ 120 | R$ 120 |
+| Margem líquida sobre faturamento (após mídia, plataforma, imposto) | 30% | 30% | 30% |
 | **Faturamento mensal necessário** | — | **~R$ 50.000** | **~R$ 100.000** |
 | **Compradores/mês** | — | **~420** | **~840** |
 | Compradores/dia | — | ~14 | ~28 |
 | **Verba de anúncio/mês** (ROAS 2,0) | — | **~R$ 25.000** | **~R$ 50.000** |
 
-**Três coisas que isso me diz, e que eu não posso fingir que não vi:**
+O que muda em relação à versão anterior deste mapa: agora tenho nicho e arquitetura, então essa tabela deixa de ser genérica e vira **a meta concreta para o TAF militar**. Faltam dois números para ela sair do campo hipotético:
 
-1. **O mercado comporta a renda; o modelo "só front-end de R$ 47" não.** Sem order bump e upsell, o ticket médio cai para ~R$ 47 e eu precisaria de ~1.060 compradores/mês para os mesmos R$ 15k — com margem praticamente zero. **A esteira não é um upgrade futuro, é pré-requisito.**
-2. **O gargalo real é caixa, não habilidade.** R$ 25 mil/mês de verba de anúncio precisam sair de algum lugar antes do lucro voltar. Com 2h/dia e sem capital, chegar direto em A é improvável. Isso reforça começar por B (serviço) ou por uma escada de verba muito mais lenta.
-3. **2h/dia é compatível com a fase de aprendizado, não com a fase de escala.** Meu próprio plano já diz 8h/dia em um ano — a aritmética concorda com ele.
-
-**Comparação honesta com o recorte B (serviço de tráfego):** R$ 15k/mês = **5 a 8 clientes** pagando R$ 2.000–3.000/mês **[Hipótese: faixa de preço de gestor de tráfego iniciante-intermediário no Brasil. Checar em uma tarde: grupos de gestores no Facebook/Telegram, propostas públicas, LinkedIn]**. Capital de giro perto de zero. O custo é que eu vendo tempo — o que bate com o teto de 8h/dia, mas não com "negócio enxuto e escalável".
+1. **Quantas pessoas por dia/mês pesquisam ou se preparam para concursos militares no Brasil** — isso define se ~420 compradores/mês é 1% de um universo grande ou 20% de um universo pequeno. **[Preencher: Google Trends para "TAF concurso", número de editais militares abertos por ano, vagas ofertadas.]**
+2. **O preço real do front-end e do upsell** — sem isso o ticket médio de R$ 120 é um placeholder, não um dado.
 
 ---
 
-### 5. Concorrência direta
+### 6. Concorrência direta
 
-| Concorrente | Forte em | Fraco em | Preço aproximado |
+Ainda não mapeada. No nicho de TAF/concurso militar, os concorrentes prováveis são:
+
+| Concorrente provável | Forte em | Fraco em | Preço aproximado |
 |---|---|---|---|
-| Infoprodutor estabelecido no nicho (com equipe e criativos) | Verba, dados históricos, autoridade | Lento para testar oferta nova, estrutura cara | **[Preencher após mapear]** |
-| Produtor low ticket "de volume" (vários produtos, esteira agressiva) | Velocidade de teste, esteira bem montada | Retenção e reputação, reembolso alto | R$ 27–97 no front |
-| Criador de conteúdo com audiência orgânica no nicho | CAC quase zero, confiança | Depende de aparecer, não sabe escalar em pago | Variado |
-| Afiliado rodando o produto de outro | Não precisa criar produto | Margem espremida, zero ativo próprio | Igual ao produtor |
+| Cursinho militar tradicional (foco em teoria, TAF como módulo secundário) | Autoridade, marca conhecida | TAF é tratado como extra, não como produto principal | **[Preencher]** |
+| Personal trainer/ex-militar especialista em TAF (Instagram/YouTube) | Credibilidade prática, autoridade de quem passou | Não tem esteira, vende mentoria cara ou nada | **[Preencher]** |
+| Produtor digital genérico de "preparação física para concurso" | Já testou oferta, pode ter esteira | Pode não segmentar por força, perder conversão no upsell | **[Preencher]** |
 
-**Como preencher isto em uma tarde (sem inventar):**
-1. Biblioteca de Anúncios do Meta → busca por palavras-chave do nicho → listar quem está anunciando **há mais de 60 dias** (anúncio que fica no ar é anúncio que dá lucro).
-2. Comprar 2 ou 3 produtos concorrentes de R$ 27–47 e **percorrer a esteira inteira** anotando: preço do front, bump, upsell, downsell, e-mails que chegam depois.
-3. Marketplace da Hotmart/Kiwify → ordenar por temperatura/mais vendidos no nicho.
-
----
-
-### 6. Concorrência indireta — provavelmente meu concorrente real
-
-No começo, eu não perco a venda para outro infoproduto. Perco para:
-
-- **YouTube e TikTok gratuitos.** No Brasil quase todo conteúdo de nicho já existe de graça, bem produzido. Meu produto compete com "eu procuro no YouTube depois".
-- **ChatGPT / IA gratuita.** Isso é novo e é sério: boa parte do que se vendia como ebook, planilha, roteiro ou checklist de R$ 47 hoje o comprador gera sozinho em 5 minutos. **A IA está corroendo o valor do produto puramente informacional.**
-- **Grupo de Telegram/Drive com material pirateado.**
-- **"Faço eu mesmo na planilha"** — se o produto for ferramenta/processo.
-- **Não fazer nada.** O maior de todos. A pessoa quer emagrecer/ganhar dinheiro/passar no concurso, adia, e o desejo esfria.
-
-**Implicação para minha oferta:** se a IA gera meu produto de graça, meu produto está morto. O que a IA não entrega é **contexto aplicado, sequência, acompanhamento e implementação**. É para lá que meu produto tem que ir — e isso vale tanto para A quanto para C.
+**Como preencher isto em uma tarde:**
+1. Biblioteca de Anúncios do Meta → buscar "TAF", "teste de aptidão física", "concurso militar treino" → listar quem anuncia há mais de 60 dias.
+2. Comprar 2 produtos concorrentes (se existirem) e mapear a esteira completa: preço do front, bump, upsell, se segmentam por força.
+3. YouTube → buscar "treino TAF [força específica]" → ver quantos canais têm conteúdo extenso e gratuito (isso também é concorrência indireta, ver seção 7).
 
 ---
 
-### 7. O que mudou nos últimos 2 anos (hipóteses minhas + como checar)
+### 7. Concorrência indireta — provavelmente o concorrente real aqui
+
+- **YouTube.** Este é provavelmente o concorrente mais forte no nicho: ex-militares e personal trainers publicam treinos de TAF gratuitos, às vezes segmentados por força. Preciso descobrir se esse conteúdo já é "bom o suficiente" ou se falta a ele estrutura/sequência/acompanhamento — é aí que meu produto precisa competir.
+- **Grupo de WhatsApp/Telegram de concurseiros**, onde planilhas de treino circulam de graça, compartilhadas por quem já passou.
+- **Professor de educação física local/presencial.** Compete pela mesma dor, mas está fora do meu escopo (venda local excluída) — pode até ser aliado/afiliado, não só concorrente.
+- **ChatGPT/IA gratuita.** Um concurseiro pode pedir "monte um treino de TAF para o Exército, sou homem, 25 anos, tenho 8 semanas" e receber algo razoável de graça. Isso ataca diretamente a proposta de um ebook/PDF estático. **Implicação para a oferta:** o produto não pode ser só informação genérica — precisa de sequência estruturada, progressão, e idealmente algum tipo de acompanhamento ou comunidade que a IA sozinha não replica.
+- **Não fazer nada / adiar o treino** até a prova estar próxima — provavelmente o maior concorrente de todos, e explica por que "prazo até a prova" é uma das dimensões de segmentação que já identifiquei.
+
+---
+
+### 8. O que mudou nos últimos 2 anos (hipóteses + como checar)
 
 | Mudança | O que eu acho que está acontecendo | Como confirmo |
 |---|---|---|
-| **CPM/CPA subindo** | Anunciar ficou mais caro; margem de low ticket ficou mais fina | Perguntar em 3 grupos de gestores; comparar CPA histórico de quem já roda no nicho |
-| **IA barateou produção de criativo e de produto** | Mais gente anunciando, mais oferta parecida, mais commodity | Contar anúncios ativos no nicho na Biblioteca do Meta hoje vs. rastrear por 30 dias |
-| **Pix no checkout** | Conversão maior e recebimento mais rápido em low ticket | Página de preços/docs das plataformas; perguntar a produtores o % de vendas no Pix |
-| **Meta Advantage+ / campanhas mais automáticas** | Menos vantagem em "saber configurar", mais vantagem em **oferta e criativo** | Documentação do Meta + o que gestores estão dizendo em 2025–2026 |
-| **Compradores mais céticos com promessa de renda** | Nichos de "ganhar dinheiro" mais saturados e com mais reembolso | Ler comentários e avaliações em produtos concorrentes |
-
-**Se a hipótese do Advantage+ estiver certa, ela muda meu posicionamento:** vender "eu sei configurar campanha" (recorte B) vira commodity; vender "eu construo oferta + criativo + esteira que converte" continua valendo. Isso me empurra para A ou para um B mais estratégico.
+| Mais concursos militares abertos (PM estadual em vários estados, forças federais) | Mais editais = mais gente pesquisando TAF | Levantar editais publicados em 2024–2026 |
+| IA barateou geração de plano de treino | Concorrência do "faço com ChatGPT" pode estar crescendo | Testar eu mesmo o prompt e avaliar a qualidade da resposta |
+| CPM/CPA subindo no Meta Ads em geral | Front-end pode rodar com margem mais apertada do que em 2023 | Perguntar em grupos de gestores de tráfego sobre CPA em nichos de concurso/fitness |
+| Pix no checkout | Conversão maior, recebimento mais rápido | Já é premissa assumida no fluxo de caixa |
 
 ---
 
-### 8. Onde eu entro
+### 9. Onde eu entro — resumo
 
-- **Nicho:** [Preencher]
-- **Faixa de preço de entrada:** [Preencher — front R$ __ , bump R$ __ , upsell R$ __ ]
-- **Geografia:** Brasil, 100% online (venda local está fora — decisão já tomada no Estilo de Vida)
-- **Por que esse espaço estaria desatendido:** [Preencher — se eu não souber responder isso, ainda não escolhi um recorte, escolhi um assunto]
+- **Nicho:** concurseiros da área militar, dor do TAF
+- **Faixa de preço de entrada:** front R$ **[Preencher]**, bump R$ **[Preencher]**, upsell por força R$ **[Preencher]**
+- **Geografia:** Brasil, 100% online
+- **Por que esse espaço estaria desatendido:** hipótese a validar — cursinhos tratam TAF como módulo secundário e conteúdo gratuito no YouTube não é estruturado nem segmentado por força/sexo/idade/prazo. **[Preencher: isso é verdade depois de eu efetivamente assistir ao conteúdo concorrente?]**
 
 ---
 
-### 9. Checklist de verificação (dá para fazer em uma tarde cada)
+### 10. Checklist de verificação (uma tarde cada)
 
-- [ ] Escolhi entre os recortes A, B, C ou B→A
+- [x] Escolhi o recorte (A — produto digital de baixo ticket)
+- [x] Escolhi o nicho e a dor específica (TAF, concurso militar)
+- [x] Defini a arquitetura do funil (front genérico + upsell por força/sexo/idade/prazo)
+- [x] Decidi a sequência de validação (front-end antes da esteira)
+- [ ] Defini o critério numérico de "front-end validado"
+- [ ] Levantei volume de editais/vagas militares nos últimos 2 anos, como proxy de tamanho de mercado
 - [ ] Listei 10 anunciantes ativos há +60 dias no nicho (Biblioteca de Anúncios do Meta)
-- [ ] Comprei e mapeei a esteira completa de 2 concorrentes
-- [ ] Confirmei as taxas reais de 3 plataformas de checkout
-- [ ] Validei se a IA gratuita já resolve o problema que pretendo vender
-- [ ] Refiz a tabela da seção 4 com **meus** números de ticket e margem, não com as hipóteses genéricas
-- [ ] Confirmei de onde sai a verba de anúncio dos primeiros 3 meses
+- [ ] Mapeei a oferta gratuita no YouTube para o mesmo público (concorrência indireta real)
+- [ ] Defini preço do front-end, do bump e de pelo menos um upsell por força
+- [ ] Confirmei as taxas reais de 2-3 plataformas de checkout
+- [ ] Refiz a tabela da seção 5 com meus números reais, não com os placeholders
 
-### 10. Perguntas em aberto que travam o próximo item
+### 11. Perguntas em aberto que travam o próximo item
 
-1. Qual nicho? (sem isso, "Problemas" e "Cliente Ideal" não têm o que descrever)
-2. Quanto de caixa eu consigo colocar em anúncio nos primeiros 90 dias, sem apertar minha vida?
-3. Eu tenho alguma vantagem injusta em algum nicho — experiência, rede de contatos, vivência? (isso corta o custo de entrada mais do que qualquer tática)
-4. Aceito começar vendendo serviço (tempo) para financiar o produto, ou isso conflita com o motivo pelo qual eu quero esse negócio?
+1. Qual é o critério objetivo para dizer "o front-end validou"? (número de vendas, CAC-alvo, prazo)
+2. Qual força eu construo primeiro no upsell — a que eu tenho mais vantagem/conhecimento, ou a que tem mais volume de editais agora?
+3. Quanto de caixa eu de fato vou colocar em anúncio nos primeiros 90 dias de teste do front-end?
+4. Eu (ou alguém da minha rede) tenho vivência militar ou de preparação física para concurso? Isso é a "vantagem injusta" que dá credibilidade ao produto e corta custo de aquisição de confiança.

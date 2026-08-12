@@ -1,13 +1,12 @@
 ---
-title: "Oferta"
-slug: "oferta"
-category: "validacao"
+title: Oferta
+slug: oferta
+category: validacao
 order: 1
-summary: "Como a oferta está sendo testada no mundo real e o que os dados mostram."
-status: "not_started"
-updatedAt: "2026-07-11"
+summary: Como a oferta está sendo testada no mundo real e o que os dados mostram.
+status: not_started
+updatedAt: '2026-08-04'
 ---
-
 ## O que você já validou sobre a oferta?
 
 Este item é diferente do "Oferta" em Direção: aqui não é a hipótese, é o que o mercado real já respondeu quando você colocou um preço na mesa.

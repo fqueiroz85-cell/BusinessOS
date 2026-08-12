@@ -3,17 +3,25 @@ title: Objetivo
 slug: objetivo
 category: founder
 order: 1
-summary: Por que esse negócio existe e o que você quer alcançar com ele.
+summary: >-
+  Side project enxuto que vira negócio principal, mirando 3x o salário em 3 anos
+  e domínio de tráfego, IA e low ticket
 status: in_progress
-updatedAt: '2026-08-03'
+updatedAt: '2026-08-12'
 answers:
   porque-agora: >-
     é uma oportunidade negócio que faz muito tempo que desejo explorar. Primeiro
     cmo side project  e depois inserir mais energia
   marco-3-anos: >-
     Ter uma renda superior em 3 vezes o meu salário e que tenha tido
-    conhecimento sobre usso de ia para construção de negócios. E dominie gestão
-    de trafego para qualquer tipo de produto. 
+    conhecimento sobre uso de IA para construção de negócios. E dominar gestão
+    de tráfego para qualquer tipo de produto.
+
+
+    Esclarecimento: os R$ 15.000 de renda mínima declarados em Estilo de Vida JÁ
+    SÃO o "3x o meu salário" — foi por isso que usei esse valor como referência.
+    Ou seja, salário atual ≈ R$ 5.000. Os R$ 30.000 são o foco para 3 anos, não
+    o piso.
   ocupacao: Primeiro como renda extra e logo em seguida negócio principal.
   ambicao: |
     Um negócio enxuto e lucrativo
@@ -21,70 +29,61 @@ answers:
     Gestão de trafego, Automações, entender esteira de produto e ter me tornado
     expert em low ticket
 briefing: >-
-  ## BRIEFING — OBJETIVO DO NEGÓCIO
+  # Briefing do Founder
 
 
-  **Visão de curto prazo**
+  ## Motivação
 
-  Você quer começar como side project com comprometimento crescente,
-  transformando uma oportunidade que explora há tempo em renda extra. O objetivo
-  é virar negócio principal assim que viável.
-
-
-  **Modelo de negócio**
-
-  Lifestyle business — enxuto, lucrativo, sem pressão de escala ou captação.
-  Você não quer construir uma empresa grande, mas sim uma máquina que gera
-  resultado com eficiência.
+  Oportunidade de negócio que deseja explorar há tempo. Começará como **side
+  project** e depois dedicará mais energia conforme evolua.
 
 
-  **Metas em 3 anos**
+  ## Métrica de Sucesso (3 anos)
 
-  - Renda mínima: 3x seu salário atual
+  - **Renda**: R$ 30.000/mês (3x seu salário atual)
 
-  - Expertise adquirida: gestão de tráfego (qualquer produto), aplicação prática
-  de IA em negócios
-
-  - Nível técnico: domínio completo de funis e esteiras de vendas
+  - **Conhecimentos**: uso de IA para construção de negócios + domínio de gestão
+  de tráfego para qualquer tipo de produto
 
 
-  **O que você quer aprender mesmo que falhe**
+  ## Trajetória
 
-  Esse é seu real norte — você priorizará ganhar profundidade em:
+  1. Fase inicial: renda extra
 
-  - Gestão de tráfego (pré-requisito do modelo)
-
-  - Automações (eficiência operacional)
-
-  - Arquitetura de esteira de produto (conversão)
-
-  - Low ticket (validação rápida e receita escalável)
+  2. Evolução: negócio principal
 
 
-  **Implicação estratégica**
-
-  Você está construindo mais por aprendizado e independência financeira do que
-  por ambição de crescimento exponencial. O negócio serve como veículo para
-  dominar habilidades que aumentem sua empregabilidade e autonomia — mesmo que o
-  projeto específico não vingue, essas skills continuam com você.
+  **Tipo de negócio**: enxuto e lucrativo (lifestyle business — sem ambição de
+  escala agressiva ou captação)
 
 
-  **Recomendação**
+  ## Aprendizados Prioritários
 
-  Use os primeiros 6 meses como *laboratório de aprendizado*. Escolha um modelo
-  low ticket, teste gestão de tráfego ao vivo, estude automações na prática.
-  Isso define se você segue como renda extra escalável ou pivotar.
-briefingGeneratedAt: '2026-08-03T16:07:48.664Z'
-reviewStatus: proposed
-proposedBy: 'agent:summarizer'
-proposedAt: '2026-08-03T16:26:35.810Z'
-proposedRationale: >-
-  Resumo desatualizado: O resumo atual só descreve o propósito do item; o
-  founder já respondeu com conclusões concretas (lifestyle business, meta de
-  renda, horizonte de virada, skills-alvo) que o resumo não captura.
-proposedSummary: >-
-  Side project enxuto que vira negócio principal, mirando 3x o salário em 3 anos
-  e domínio de tráfego, IA e low ticket
+  Se o negócio não desse certo em 1 ano, o founder quer ter aprendido:
+
+  - Gestão de tráfego
+
+  - Automações
+
+  - Esteira de produto
+
+  - Expertise em low ticket
+
+
+  ---
+
+
+  **Leitura minha**: a prioridade de aprendizados sugere que tráfego e conversão
+  são centrais para o modelo — não parece ser um negócio baseado em produto
+  próprio complexo, mas em operação ágil de baixo ticket. A ênfase em gestão de
+  tráfego + automações + esteira aponta para algo com alta dependência de
+  otimização e escalabilidade operacional.
+briefingGeneratedAt: '2026-08-12T03:08:02.988Z'
+acceptedFrom: 'agent:summarizer'
+acceptedAt: '2026-08-03T16:51:04.538Z'
+responsavel: ''
+tags: []
+revisao: 1
 ---
 ## Qual é o seu objetivo com esse negócio?
 
